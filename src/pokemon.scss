@@ -1,0 +1,45 @@
+.pokemon-namelist {
+    ul {
+        display: flex;
+        flex-wrap: wrap;
+        list-style: none;
+        justify-content: center;
+
+        :first-child {
+            text-transform: capitalize;
+        }
+        
+        a {
+            margin-right: 1rem;
+            margin-bottom: 1rem;
+            padding: 20px 15px;
+            border-radius: 10px;
+            text-decoration: none;
+            background-color: #5555;
+            width: 150px;
+            color: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
+            color: white;
+        
+            &:hover {
+                color: #FFDE00;
+                background-color: red;
+                transition: 0.2s;
+            }
+
+            li {
+
+                h5 {
+                    margin-top: 10px;
+                    width: 150px;
+                }
+            }
+        }
+
+        
+    }
+}
