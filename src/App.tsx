@@ -1,11 +1,10 @@
-import './App.scss'
-import { PokemonCard } from '../components/PokemonCard'
-import { PokedexHeader } from '../components/PokedexHeader'
+import { PokemonCard } from './components/Pokemon/PokemonCard'
+import { Header } from './components/Header'
 
 function App() {
   return (
     <> 
-      <PokedexHeader />
+      <Header />
       <PokemonCard/>
     </>
     

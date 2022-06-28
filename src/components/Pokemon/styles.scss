@@ -1,0 +1,54 @@
+.pokemon-namelist {
+    ul {
+        display: flex;
+        flex-wrap: wrap;
+        list-style: none;
+        justify-content: center;
+
+        :first-child {
+            text-transform: capitalize;
+        } 
+        
+        a {
+            margin-right: 0.7rem;
+            margin-bottom: 1rem;
+            padding: 20px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            background-color: white;
+            background-image: url('../../img/pokeball.png');
+            opacity: 0.5;
+            background-repeat: no-repeat;
+            background-position: 100px -20px;
+            width: 250px;
+            color: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
+        
+            &:hover {
+                opacity: 1;
+                transform: scale(1.1);
+                transition: 0.1s;
+                z-index: 999;
+            }
+
+            
+
+            li {
+
+                h5 {
+                    margin-top: 10px;
+                    width: 150px;
+                    display: inline-block;
+                    justify-content: center;
+                    align-items: center;
+                }
+            }
+        }
+
+        
+    }
+}
