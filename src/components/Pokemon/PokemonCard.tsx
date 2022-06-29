@@ -12,7 +12,7 @@ export function PokemonCard() {
     const [pokemons, setPokemons] = useState<PokemonList[]>([]);
    
     useEffect(() => { 
-        fetch(`https://pokeapi.co/api/v2/pokemon/?limit=3`)
+        fetch(`https://pokeapi.co/api/v2/pokemon/?limit=386`)
         .then(response => response.json())
         .then(data => setPokemons(data.results))
           
