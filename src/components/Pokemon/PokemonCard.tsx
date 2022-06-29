@@ -3,36 +3,29 @@ import { PokemonInfo } from './PokemonInfo';
 import '../Pokemon/styles.scss';
 
 interface PokemonList {
-    url: string;
+    id: number;
     name: string; 
+    url: string;
 }
 
 export function PokemonCard() {
     const [pokemons, setPokemons] = useState<PokemonList[]>([]);
    
     useEffect(() => { 
-        fetch(`https://pokeapi.co/api/v2/pokemon/?limit=386`)
+        fetch(`https://pokeapi.co/api/v2/pokemon/?limit=3`)
         .then(response => response.json())
         .then(data => setPokemons(data.results))
           
     }, []);
-
+    
     return (       
         <section className="pokemon-namelist">    
             <ul>
-                {
-                    pokemons.map(pokemon => {
-                        return (
-                            <>
-                                <a href={'#'} key={pokemon.name}>
-                                    <li>
-                                        <PokemonInfo pokemon={pokemon} />
-                                    </li>
-                                </a>  
-                            </>
-                        )
-                    })
-                }  
+                {pokemons.map(pokemon => {
+                    return (
+                        <PokemonInfo key={pokemon.name} pokemon={pokemon}/>   
+                    ); 
+                })}  
             </ul>
         </section>
     );
