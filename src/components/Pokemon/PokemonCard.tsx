@@ -17,7 +17,7 @@ export function PokemonCard() {
           
     }, []);
     
-    return (       
+    return (  
         <section className="pokemon-namelist">    
             <ul>
                 {pokemons.map(pokemon => {
@@ -26,6 +26,6 @@ export function PokemonCard() {
                     ); 
                 })}  
             </ul>
-        </section>
+        </section>   
     );
 }
