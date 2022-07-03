@@ -1,5 +1,4 @@
 import '../Header/styles.scss';
-import { SearchBox } from '../SearchBox';
 
 export function Header() {
     return (
