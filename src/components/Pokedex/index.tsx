@@ -54,7 +54,7 @@ export function Pokedex(props: Pokedex) {
 
                 return(
                     <>
-                        <a onClick={flipCard} onMouseEnter={click}>
+                        <a href={'#' + id} onClick={flipCard} onMouseEnter={click} onMouseLeave={flipCheck?(flipCard) : click }>
                             {flipCheck?(
                                  <li>
                                     <h4>Abilities:</h4>
