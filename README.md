@@ -1,4 +1,4 @@
 # react-pokedex
 
-Pokédex using React, Typescript, Sass and Axios (work in progress)
+Pokédex I developed using React, Typescript, Sass, Axios and use-sound
 https://react-pokedex-ebon.vercel.app/
