@@ -2,113 +2,80 @@ import { useState, useEffect } from 'react';
 import useSound from 'use-sound';
 import clickSfx from '../../sounds/click.mp3'
 import { api } from '../../services/api';
+import { PokemonStats } from '../PokemonStats';
+import { PokemonAbilities } from '../PokemonAbilities';
+import { PokemonImage } from '../PokemonImage';
 
-interface Pokedex {
-    id?: number;
-    name: string;
-    types?: any;
-    sprites?: any;
-    abilities?: any;
-    stats?: any;
+interface PokedexType {
+    type: { name: string };
 }
 
-export function Pokedex(props: Pokedex) {
-    const [pokedex, setPokedex] = useState<Pokedex[]>([]);
+interface PokedexSprite {
+    other: { home: { front_default: string } };
+}
+
+interface PokedexAbility {
+    ability: { name: string };
+    is_hidden?: boolean;
+}
+
+interface PokedexStat {
+    base_stat: number;
+    stat: { name: string };
+}
+
+interface PokedexEntry {
+    id?: number;
+    name: string;
+    types?: PokedexType[];
+    sprites?: PokedexSprite;
+    abilities?: PokedexAbility[];
+    stats?: PokedexStat[];
+}
+
+export function Pokedex(props: { name: string }) {
+    const [pokemonData, setPokemonData] = useState<PokedexEntry | null>(null);
     const [flip, setFlip] = useState(false);
 
-    const getPokedex = async () => {
-        await api.get(`${props.name}`)
-        .then(response => setPokedex([...pokedex, response.data]))  
+    useEffect(() => {
+        const getPokedex = async () => {
+            try {
+                const response = await api.get(`${props.name}`);
+                setPokemonData(response.data);
+            } catch (error) {
+                console.error("Failed to fetch Pokedex data:", error);
+            }
+        };
+        getPokedex();
+    }, [props.name]);
+
+    const [click]: [(() => void) | undefined, ({ stop: () => void; }) | undefined] = useSound(clickSfx);
+
+    if (!pokemonData) {
+        return <div>Loading...</div>;
     }
 
-    const [click]: any = useSound(clickSfx)
+    const { id, name, types, sprites, abilities, stats } = pokemonData;
+    const spriteUrl = sprites?.other?.home?.front_default ?? '';
 
-    useEffect(() => { 
-        getPokedex()
-    }, [])  
+    function flipCard() {
+        setFlip(currentFlip => !currentFlip);
+    }
 
-    return(
+    const flipCheck = flip ? 'active' : null;
+
+    return (
         <>
-            {pokedex.map(pokemon => {
-                let id = pokemon.id
-                let name = pokemon.name
-                let type1 = pokemon.types[0].type.name
-                let type2 = pokemon.types[1]?.type.name
-                let sprite = pokemon.sprites.other.home.front_default
-                let ability1 = pokemon.abilities[0].ability.name
-                let ability2 = pokemon.abilities[1]?.ability.name
-                let ability3 = pokemon.abilities[2]?.ability.name
-                let hp = pokemon.stats[0].base_stat
-                let attack = pokemon.stats[1].base_stat
-                let defense = pokemon.stats[2].base_stat
-                let special_attack = pokemon.stats[3].base_stat
-                let special_defense = pokemon.stats[4].base_stat
-                let speed = pokemon.stats[5].base_stat
-                let maxStat = 255
-                
-                function flipCard() {
-                    setFlip(flip => !flip)
-                }
-
-                let flipCheck = flip ? 'active' : null;
-
-                return(
-                    <>
-                        <a href={'#' + id} onClick={flipCard} onMouseEnter={click} onMouseLeave={flipCheck?(flipCard) : click }>
-                            {flipCheck?(
-                                 <li>
-                                    <h4>Abilities:</h4>
-                                    <li>{ability1}</li>
-                                    {ability2?(
-                                        <li>{ability2}</li>
-
-                                    ):(
-                                        <></>
-                                    )}
-                                    {ability3?(
-                                        <li>{ability3}</li>
-
-                                    ):(
-                                        <></>
-                                    )}
-                                    <br/>
-                                    <h4>Base Stats:</h4>
-                                    <li>
-                                        <p>HP: <progress value={hp} max={maxStat}/> {hp}</p>
-                                    </li>
-                                    <li>
-                                        <p>Attack: <progress value={attack} max={maxStat}/> {attack}</p>
-                                    </li>
-                                    <li>
-                                        <p>Defense: <progress value={defense} max={maxStat}/> {defense}</p>
-                                    </li>
-                                    <li>
-                                        <p>Sp. Attack: <progress value={special_attack} max={maxStat}/> {special_attack}</p>
-                                    </li>
-                                    <li>
-                                        <p>Sp. Defense: <progress value={special_defense} max={maxStat}/> {special_defense}</p>
-                                    </li>
-                                    <li>
-                                        <p>Speed: <progress value={speed} max={maxStat}/> {speed}</p>
-                                    </li>
-                                 </li>
-                            ):(
-                                <li>
-                                    <img src={sprite} />
-                                    <p>#{id}</p>  
-                                    <h4>{name}</h4>
-                                    <p className={"type1 " + type1}>{type1}</p>
-                                    {type2?(
-                                        <p className={"type2 " + type2}>{type2}</p> 
-                                    ):(
-                                        <></>
-                                    )}
-                                </li>
-                            )} 
-                        </a>  
-                    </>
-                )
-            })}
+            <a href={`#${id}`} onClick={flipCard} onMouseEnter={click} onMouseLeave={flipCheck && click ? flipCard : click}>
+                {flipCheck ? (
+                    <li>
+                        <PokemonAbilities abilities={abilities} />
+                        <PokemonStats stats={stats} />
+                    </li>
+                ) : (
+                    <PokemonImage id={id} name={name} sprite={spriteUrl} types={types} />
+                )}
+            </a>
         </>
-    )  
+    );
 }
