@@ -66,7 +66,7 @@ export function Pokedex(props: { name: string }) {
 
     return (
         <>
-            <a href={`#${id}`} onClick={flipCard} onMouseEnter={click} onMouseLeave={flipCheck && click ? flipCard : click}>
+            <a href={`#${id}`} onClick={flipCard} onMouseEnter={click} onMouseLeave={flipCheck ? flipCard : click}>
                 {flipCheck ? (
                     <li>
                         <PokemonAbilities abilities={abilities} />
