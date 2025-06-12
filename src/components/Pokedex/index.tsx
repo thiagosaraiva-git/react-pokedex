@@ -51,11 +51,7 @@ export function Pokedex(props: { name: string }) {
 
     const [click]: [(() => void) | undefined, ({ stop: () => void; }) | undefined] = useSound(clickSfx);
 
-    if (!pokemonData) {
-        return <div>Loading...</div>;
-    }
-
-    const { id, name, types, sprites, abilities, stats } = pokemonData;
+    const { id, name, types, sprites, abilities, stats } = pokemonData!;
     const spriteUrl = sprites?.other?.home?.front_default ?? '';
 
     function flipCard() {
