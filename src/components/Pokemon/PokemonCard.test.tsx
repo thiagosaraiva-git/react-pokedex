@@ -51,6 +51,31 @@ const mockPokemonData = [
   },
 ]
 
+const mockPokemonDataWithForms = [
+  ...mockPokemonData,
+  {
+    id: 6,
+    name: 'charizard',
+    types: [{ type: { name: 'fire' } }, { type: { name: 'flying' } }],
+  },
+  {
+    id: 10034,
+    name: 'charizard-mega-x',
+    types: [{ type: { name: 'fire' } }, { type: { name: 'dragon' } }],
+  },
+  {
+    id: 10035,
+    name: 'charizard-mega-y',
+    types: [{ type: { name: 'fire' } }, { type: { name: 'flying' } }],
+  },
+  { id: 26, name: 'raichu', types: [{ type: { name: 'electric' } }] },
+  {
+    id: 10100,
+    name: 'raichu-alola',
+    types: [{ type: { name: 'electric' } }, { type: { name: 'psychic' } }],
+  },
+]
+
 describe('PokemonCard Filter Logic', () => {
   const defaultProps = {
     nameFilter: '',
@@ -386,5 +411,40 @@ describe('PokemonCard Filter Logic', () => {
 
     const initialCount = screen.getAllByTestId(/pokemon-/).length
     expect(initialCount).toBeLessThanOrEqual(40)
+  })
+
+  it('should filter out alternate forms and only show base forms', async () => {
+    const mockGet = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('?limit=')) {
+        return Promise.resolve({
+          data: {
+            results: mockPokemonDataWithForms.map(p => ({
+              name: p.name,
+              url: `https://pokeapi.co/api/v2/pokemon/${p.id}/`,
+            })),
+          },
+        })
+      }
+      const pokemonName = url
+      const pokemon = mockPokemonDataWithForms.find(p => p.name === pokemonName)
+      return Promise.resolve({ data: pokemon })
+    })
+
+    ;(apiModule.api.get as any) = mockGet
+
+    render(<PokemonCard {...defaultProps} />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('pokemon-charizard')).toBeInTheDocument()
+      expect(screen.getByTestId('pokemon-raichu')).toBeInTheDocument()
+    })
+
+    expect(
+      screen.queryByTestId('pokemon-charizard-mega-x')
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByTestId('pokemon-charizard-mega-y')
+    ).not.toBeInTheDocument()
+    expect(screen.queryByTestId('pokemon-raichu-alola')).not.toBeInTheDocument()
   })
 })
