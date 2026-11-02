@@ -1,5 +1,7 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import axios from 'axios'
 import './styles.scss'
+import { getFormDisplayName } from '../../utils/pokemonNames'
 
 interface PokedexType {
   type: { name: string }
@@ -13,6 +15,23 @@ interface PokedexAbility {
 interface PokedexStat {
   base_stat: number
   stat: { name: string }
+}
+
+interface PokemonForm {
+  name: string
+  sprites: {
+    front_default?: string
+    other?: { home?: { front_default?: string } }
+  }
+  types?: PokedexType[]
+}
+
+interface PokemonVariety {
+  is_default: boolean
+  pokemon: {
+    name: string
+    url: string
+  }
 }
 
 interface PokemonModalProps {
@@ -41,6 +60,12 @@ export function PokemonModal({
   const modalRef = useRef<HTMLDivElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null)
+
+  const [forms, setForms] = useState<PokemonForm[]>([])
+  const [selectedFormIndex, setSelectedFormIndex] = useState(0)
+  const [isLoadingForms, setIsLoadingForms] = useState(false)
+  const [currentSprite, setCurrentSprite] = useState(sprite)
+  const [currentTypes, setCurrentTypes] = useState(types)
 
   useEffect(() => {
     if (!isOpen) return
@@ -83,10 +108,79 @@ export function PokemonModal({
     }
   }, [isOpen, onClose])
 
+  useEffect(() => {
+    if (!isOpen || !id) return
+
+    setIsLoadingForms(true)
+    setSelectedFormIndex(0)
+    setCurrentSprite(sprite)
+    setCurrentTypes(types)
+
+    const fetchForms = async () => {
+      try {
+        const speciesResponse = await axios.get(
+          `https://pokeapi.co/api/v2/pokemon-species/${id}`
+        )
+        const varieties: PokemonVariety[] = speciesResponse.data.varieties || []
+
+        if (varieties.length <= 1) {
+          setForms([])
+          setIsLoadingForms(false)
+          return
+        }
+
+        const formDataPromises = varieties.map(async variety => {
+          try {
+            const pokemonResponse = await axios.get(variety.pokemon.url)
+            return {
+              name: variety.pokemon.name,
+              sprites: pokemonResponse.data.sprites,
+              types: pokemonResponse.data.types || [],
+            } as PokemonForm
+          } catch (error) {
+            console.error(
+              `Failed to fetch form data for ${variety.pokemon.name}:`,
+              error
+            )
+            return null
+          }
+        })
+
+        const formsData = await Promise.all(formDataPromises)
+        const validForms: PokemonForm[] = formsData.filter(
+          (form): form is PokemonForm => form !== null
+        )
+
+        setForms(validForms)
+      } catch (error) {
+        console.error('Failed to fetch Pokemon forms:', error)
+        setForms([])
+      } finally {
+        setIsLoadingForms(false)
+      }
+    }
+
+    fetchForms()
+  }, [isOpen, id, name, sprite, types])
+
+  const handleFormSelect = (index: number) => {
+    if (index < 0 || index >= forms.length) return
+
+    setSelectedFormIndex(index)
+    const selectedForm = forms[index]
+    const newSprite =
+      selectedForm.sprites?.other?.home?.front_default ||
+      selectedForm.sprites?.front_default ||
+      sprite
+    setCurrentSprite(newSprite)
+    setCurrentTypes(selectedForm.types || types)
+  }
+
   if (!isOpen) return null
 
-  const type1 = types?.[0]?.type?.name ?? 'N/A'
-  const type2 = types?.[1]?.type?.name
+  const displayTypes = currentTypes || types
+  const type1 = displayTypes?.[0]?.type?.name ?? 'N/A'
+  const type2 = displayTypes?.[1]?.type?.name
 
   const normalAbilities = abilities?.filter(a => !a.is_hidden) ?? []
   const hiddenAbilities = abilities?.filter(a => a.is_hidden) ?? []
@@ -121,8 +215,8 @@ export function PokemonModal({
         </button>
 
         <div className="modal-header">
-          {sprite ? (
-            <img src={sprite} alt={name} className="modal-image" />
+          {currentSprite ? (
+            <img src={currentSprite} alt={name} className="modal-image" />
           ) : (
             <p>No Image</p>
           )}
@@ -135,6 +229,44 @@ export function PokemonModal({
             {type2 && <span className={`type-badge ${type2}`}>{type2}</span>}
           </div>
         </div>
+
+        {forms.length > 1 && (
+          <div className="modal-section forms-section">
+            <h3>Forms</h3>
+            {isLoadingForms ? (
+              <p className="loading-forms">Loading forms...</p>
+            ) : (
+              <div className="forms-grid">
+                {forms.map((form, index) => {
+                  const formSprite =
+                    form.sprites?.other?.home?.front_default ||
+                    form.sprites?.front_default
+                  return (
+                    <button
+                      key={form.name}
+                      className={`form-button ${
+                        index === selectedFormIndex ? 'active' : ''
+                      }`}
+                      onClick={() => handleFormSelect(index)}
+                      aria-label={`Switch to ${getFormDisplayName(form.name)}`}
+                    >
+                      {formSprite && (
+                        <img
+                          src={formSprite}
+                          alt={form.name}
+                          className="form-sprite"
+                        />
+                      )}
+                      <span className="form-name">
+                        {getFormDisplayName(form.name)}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="modal-body">
           <div className="modal-section">

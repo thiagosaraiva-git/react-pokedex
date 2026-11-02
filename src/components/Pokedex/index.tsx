@@ -5,6 +5,7 @@ import { api } from '../../services/api'
 import { Loading } from '../Loading'
 import { PokemonImage } from '../PokemonImage'
 import { PokemonModal } from '../PokemonModal'
+import { getCleanPokemonName } from '../../utils/pokemonNames'
 
 interface PokedexType {
   type: { name: string }
@@ -62,6 +63,7 @@ export function Pokedex(props: { name: string }) {
 
   const { id, name, types, sprites, abilities, stats } = pokemonData
   const spriteUrl = sprites?.other?.home?.front_default ?? ''
+  const cleanName = getCleanPokemonName(name)
 
   function openModal() {
     setIsModalOpen(true)
@@ -77,16 +79,21 @@ export function Pokedex(props: { name: string }) {
         className="pokemon-card-button"
         onClick={openModal}
         onMouseEnter={click}
-        aria-label={`View details for ${name}`}
+        aria-label={`View details for ${cleanName}`}
       >
-        <PokemonImage id={id} name={name} sprite={spriteUrl} types={types} />
+        <PokemonImage
+          id={id}
+          name={cleanName}
+          sprite={spriteUrl}
+          types={types}
+        />
       </button>
 
       <PokemonModal
         isOpen={isModalOpen}
         onClose={closeModal}
         id={id}
-        name={name}
+        name={cleanName}
         sprite={spriteUrl}
         types={types}
         abilities={abilities}
