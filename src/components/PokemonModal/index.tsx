@@ -66,13 +66,21 @@ export function PokemonModal({
   const [isLoadingForms, setIsLoadingForms] = useState(false)
   const [currentSprite, setCurrentSprite] = useState(sprite)
   const [currentTypes, setCurrentTypes] = useState(types)
+  const [animateStats, setAnimateStats] = useState(false)
 
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen) {
+      setAnimateStats(false)
+      return
+    }
 
     previouslyFocusedElementRef.current = document.activeElement as HTMLElement
 
     closeButtonRef.current?.focus()
+
+    setTimeout(() => {
+      setAnimateStats(true)
+    }, 50)
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -321,37 +329,68 @@ export function PokemonModal({
               <div className="stats-container">
                 <li>
                   <p>
-                    HP: <progress value={hp} max={maxStat} /> {hp}
+                    HP:{' '}
+                    <progress
+                      value={animateStats ? hp : 0}
+                      max={maxStat}
+                      className={animateStats ? 'animating' : ''}
+                    />{' '}
+                    {hp}
                   </p>
                 </li>
                 <li>
                   <p>
-                    Attack: <progress value={attack} max={maxStat} /> {attack}
+                    Attack:{' '}
+                    <progress
+                      value={animateStats ? attack : 0}
+                      max={maxStat}
+                      className={animateStats ? 'animating' : ''}
+                    />{' '}
+                    {attack}
                   </p>
                 </li>
                 <li>
                   <p>
-                    Defense: <progress value={defense} max={maxStat} />{' '}
+                    Defense:{' '}
+                    <progress
+                      value={animateStats ? defense : 0}
+                      max={maxStat}
+                      className={animateStats ? 'animating' : ''}
+                    />{' '}
                     {defense}
                   </p>
                 </li>
                 <li>
                   <p>
                     Sp. Attack:{' '}
-                    <progress value={special_attack} max={maxStat} />{' '}
+                    <progress
+                      value={animateStats ? special_attack : 0}
+                      max={maxStat}
+                      className={animateStats ? 'animating' : ''}
+                    />{' '}
                     {special_attack}
                   </p>
                 </li>
                 <li>
                   <p>
                     Sp. Defense:{' '}
-                    <progress value={special_defense} max={maxStat} />{' '}
+                    <progress
+                      value={animateStats ? special_defense : 0}
+                      max={maxStat}
+                      className={animateStats ? 'animating' : ''}
+                    />{' '}
                     {special_defense}
                   </p>
                 </li>
                 <li>
                   <p>
-                    Speed: <progress value={speed} max={maxStat} /> {speed}
+                    Speed:{' '}
+                    <progress
+                      value={animateStats ? speed : 0}
+                      max={maxStat}
+                      className={animateStats ? 'animating' : ''}
+                    />{' '}
+                    {speed}
                   </p>
                 </li>
               </div>
