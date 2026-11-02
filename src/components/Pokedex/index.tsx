@@ -64,26 +64,25 @@ export function Pokedex(props: { name: string }) {
   }
 
   return (
-    <a
-      href={`#${id}`}
+    <div
+      className={`pokemon-card-wrapper ${flip ? 'flipped' : ''}`}
       onClick={e => {
         e.preventDefault()
         flipCard()
       }}
       onMouseEnter={click}
-      className={flip ? 'flipping' : ''}
-      style={{
-        transform: flip ? 'rotateY(180deg)' : 'rotateY(0deg)',
-      }}
     >
-      {flip ? (
-        <li style={{ listStyle: 'none' }}>
-          <PokemonAbilities abilities={abilities} />
-          <PokemonStats stats={stats} />
-        </li>
-      ) : (
-        <PokemonImage id={id} name={name} sprite={spriteUrl} types={types} />
-      )}
-    </a>
+      <div className="pokemon-card-inner">
+        <div className="pokemon-card-front">
+          <PokemonImage id={id} name={name} sprite={spriteUrl} types={types} />
+        </div>
+        <div className="pokemon-card-back">
+          <li style={{ listStyle: 'none' }}>
+            <PokemonAbilities abilities={abilities} />
+            <PokemonStats stats={stats} />
+          </li>
+        </div>
+      </div>
+    </div>
   )
 }

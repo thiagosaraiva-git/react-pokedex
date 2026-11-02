@@ -1,24 +1,17 @@
 .pokedex-header {
-  background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+  background-color: #ff0000;
   box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.3),
-    0 2px 6px rgba(0, 0, 0, 0.2);
+    0 2px 5px 0 rgba(0, 0, 0, 0.16),
+    0 2px 10px 0 rgba(0, 0, 0, 0.12);
   width: 100%;
   display: flex;
   justify-content: space-between;
   position: fixed;
   z-index: 9999;
-  border-bottom: 3px solid #ffeb3b;
 
   img {
     width: 8rem;
     padding: 10px;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-    transition: transform 0.3s ease;
-
-    &:hover {
-      transform: scale(1.05);
-    }
   }
 }
 
