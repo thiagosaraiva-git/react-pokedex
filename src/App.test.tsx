@@ -46,9 +46,9 @@ describe('PokemonModal', () => {
       <PokemonModal isOpen={true} onClose={mockOnClose} {...mockPokemon} />
     )
 
-    expect(screen.getByText('pikachu')).toBeInTheDocument()
+    expect(screen.getByText('Pikachu')).toBeInTheDocument()
     expect(screen.getByText('#25')).toBeInTheDocument()
-    expect(screen.getByText('electric')).toBeInTheDocument()
+    expect(screen.getByText('Electric')).toBeInTheDocument()
   })
 
   it('should separate normal and hidden abilities', () => {
@@ -123,8 +123,8 @@ describe('PokemonModal', () => {
       <PokemonModal isOpen={true} onClose={mockOnClose} {...dualTypePokemon} />
     )
 
-    expect(screen.getByText('water')).toBeInTheDocument()
-    expect(screen.getByText('flying')).toBeInTheDocument()
+    expect(screen.getByText('Water')).toBeInTheDocument()
+    expect(screen.getByText('Flying')).toBeInTheDocument()
   })
 
   it('should handle Pokemon with no hidden abilities', () => {
