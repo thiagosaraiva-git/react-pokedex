@@ -116,7 +116,10 @@ export function PokemonModal({
     setCurrentSprite(sprite)
     setCurrentTypes(types)
 
+    let cancelled = false
+
     const fetchForms = async () => {
+      if (cancelled) return
       try {
         const speciesResponse = await axios.get(
           `https://pokeapi.co/api/v2/pokemon-species/${id}`
@@ -151,16 +154,26 @@ export function PokemonModal({
           (form): form is PokemonForm => form !== null
         )
 
-        setForms(validForms)
+        if (!cancelled) {
+          setForms(validForms)
+        }
       } catch (error) {
         console.error('Failed to fetch Pokemon forms:', error)
-        setForms([])
+        if (!cancelled) {
+          setForms([])
+        }
       } finally {
-        setIsLoadingForms(false)
+        if (!cancelled) {
+          setIsLoadingForms(false)
+        }
       }
     }
 
     fetchForms()
+
+    return () => {
+      cancelled = true
+    }
   }, [isOpen, id, name, sprite, types])
 
   const handleFormSelect = (index: number) => {
