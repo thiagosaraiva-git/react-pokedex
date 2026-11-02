@@ -185,12 +185,18 @@ export function PokemonCard() {
 
   if (isLoading) {
     return (
-      <div style={{ textAlign: 'center', padding: '2rem' }}>
-        <p>Loading Pokémon... {loadingProgress}%</p>
+      <div className="loading-container">
+        <div className="loading-spinner" />
+        <p className="loading-text">Loading Pokémon... {loadingProgress}%</p>
         <progress
           value={loadingProgress}
           max="100"
-          style={{ width: '300px', height: '20px' }}
+          style={{
+            width: '300px',
+            height: '12px',
+            borderRadius: '8px',
+            border: 'none',
+          }}
         />
       </div>
     )

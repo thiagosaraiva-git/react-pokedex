@@ -5,43 +5,86 @@
     list-style: none;
     justify-content: center;
     text-transform: capitalize;
+    perspective: 1000px;
 
     a {
       margin-right: 0.7rem;
       margin-bottom: 1rem;
       padding: 20px 15px;
-      border-radius: 5px;
+      border-radius: 12px;
       text-decoration: none;
-      background-color: white;
+      background: linear-gradient(145deg, #ffffff 0%, #f0f0f0 100%);
       background-image: url('../../img/pokeball.png');
       background-repeat: no-repeat;
       background-position: 100px -20px;
-      opacity: 0.7;
       width: 250px;
-      color: black;
+      color: #1a1a2e;
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
       box-shadow:
-        rgba(0, 0, 0, 0.1) 0px 4px 6px -1px,
-        rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
+        0 4px 15px rgba(0, 0, 0, 0.2),
+        0 1px 3px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      transform-style: preserve-3d;
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      animation: fadeInUp 0.5s ease-out backwards;
+      position: relative;
+      overflow: hidden;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      &:hover::before {
+        left: 100%;
+      }
 
       &:hover {
         cursor: pointer;
-        opacity: 1;
-        transform: scale(1.1);
-        transition: 0.1s;
+        transform: translateY(-8px) scale(1.05);
+        box-shadow:
+          0 12px 24px rgba(0, 0, 0, 0.3),
+          0 6px 12px rgba(0, 0, 0, 0.2),
+          inset 0 1px 0 rgba(255, 255, 255, 0.6);
         z-index: 999;
       }
 
+      &.flipping {
+        transform: rotateY(180deg);
+      }
+
       li {
+        width: 100%;
+        transition: opacity 0.3s ease;
+
         img {
           width: 15rem;
+          filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+          transition: transform 0.3s ease;
+        }
+
+        &:hover img {
+          transform: scale(1.05);
         }
 
         h4 {
           margin-bottom: 5px;
+          font-weight: 600;
+          color: #1a1a2e;
         }
 
         p {
@@ -49,11 +92,37 @@
           font-size: small;
 
           progress {
-            background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            border: none;
+            height: 8px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+            animation: progressFill 0.8s ease-out;
+
+            &::-webkit-progress-bar {
+              background-color: #e0e0e0;
+              border-radius: 8px;
+            }
+
+            &::-webkit-progress-value {
+              background: linear-gradient(90deg, #4caf50, #8bc34a);
+              border-radius: 8px;
+              transition: width 0.3s ease;
+            }
+
+            &::-moz-progress-bar {
+              background: linear-gradient(90deg, #4caf50, #8bc34a);
+              border-radius: 8px;
+            }
           }
         }
       }
+    }
+  }
+
+  @for $i from 1 through 50 {
+    ul a:nth-child(#{$i}) {
+      animation-delay: #{$i * 0.03}s;
     }
   }
 }
@@ -65,45 +134,71 @@
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
+  padding: 1rem;
+  animation: fadeInUp 0.4s ease-out;
 }
 
 .filters-container input[type='text'],
 .filters-container select {
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.375rem;
-  border: 1px solid #ccc;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background-color: #ffffff;
   font-size: 1rem;
   min-width: 150px;
-  background-color: #ffffff;
+  color: #1a1a2e;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  &:focus {
+    outline: none;
+    border-color: #4caf50;
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    transform: translateY(-2px);
+  }
+
+  &:hover {
+    border-color: rgba(76, 175, 80, 0.5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.filters-container input[type='text']::placeholder {
+  color: #757575;
 }
 
 .reset-button {
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  border: 1px solid #dc3545;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  border: 2px solid #dc3545;
   background-color: #dc3545;
   color: white;
   font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
-  transition:
-    background-color 0.2s,
-    transform 0.1s;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
 
   &:hover {
     background-color: #c82333;
-    transform: scale(1.05);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
   }
 
   &:active {
-    transform: scale(0.98);
+    transform: translateY(0);
   }
 }
 
 .results-info {
   text-align: center;
   margin-bottom: 1rem;
-  color: #666;
+  color: #ffffff;
   font-size: 0.95rem;
+  font-weight: 500;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  animation: fadeInUp 0.5s ease-out;
 }
 
 .load-more-trigger {
@@ -112,24 +207,54 @@
   min-height: 50px;
 
   p {
-    color: #666;
+    color: #ffffff;
     font-style: italic;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 }
 
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;
-  color: #666;
+  color: #ffffff;
+  animation: fadeInUp 0.5s ease-out;
 
   p:first-child {
     font-size: 1.2rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 
   p:last-child {
     font-size: 0.95rem;
-    color: #888;
+    color: rgba(255, 255, 255, 0.8);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  gap: 1rem;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #4caf50;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 500;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }

@@ -63,17 +63,21 @@ export function Pokedex(props: { name: string }) {
     setFlip(currentFlip => !currentFlip)
   }
 
-  const flipCheck = flip ? 'active' : null
-
   return (
-    <>
-      <a
-        href={`#${id}`}
-        onClick={flipCard}
-        onMouseEnter={click}
-        onMouseLeave={flipCheck ? flipCard : click}
-      >
-        {flipCheck ? (
+    <a
+      href={`#${id}`}
+      onClick={e => {
+        e.preventDefault()
+        flipCard()
+      }}
+      onMouseEnter={click}
+      className={flip ? 'flipping' : ''}
+      style={{
+        transform: flip ? 'rotateY(180deg)' : 'rotateY(0deg)',
+      }}
+    >
+      <div style={{ transform: flip ? 'rotateY(180deg)' : 'rotateY(0deg)' }}>
+        {flip ? (
           <li>
             <PokemonAbilities abilities={abilities} />
             <PokemonStats stats={stats} />
@@ -81,7 +85,7 @@ export function Pokedex(props: { name: string }) {
         ) : (
           <PokemonImage id={id} name={name} sprite={spriteUrl} types={types} />
         )}
-      </a>
-    </>
+      </div>
+    </a>
   )
 }
