@@ -24,6 +24,7 @@ interface PokemonForm {
     other?: { home?: { front_default?: string } }
   }
   types?: PokedexType[]
+  stats?: PokedexStat[]
 }
 
 interface PokemonVariety {
@@ -66,6 +67,7 @@ export function PokemonModal({
   const [isLoadingForms, setIsLoadingForms] = useState(false)
   const [currentSprite, setCurrentSprite] = useState(sprite)
   const [currentTypes, setCurrentTypes] = useState(types)
+  const [currentStats, setCurrentStats] = useState(stats)
   const [animateStats, setAnimateStats] = useState(false)
 
   useEffect(() => {
@@ -123,6 +125,7 @@ export function PokemonModal({
     setSelectedFormIndex(0)
     setCurrentSprite(sprite)
     setCurrentTypes(types)
+    setCurrentStats(stats)
 
     let cancelled = false
 
@@ -147,6 +150,7 @@ export function PokemonModal({
               name: variety.pokemon.name,
               sprites: pokemonResponse.data.sprites,
               types: pokemonResponse.data.types || [],
+              stats: pokemonResponse.data.stats || [],
             } as PokemonForm
           } catch (error) {
             console.error(
@@ -195,6 +199,12 @@ export function PokemonModal({
       sprite
     setCurrentSprite(newSprite)
     setCurrentTypes(selectedForm.types || types)
+    setCurrentStats(selectedForm.stats || stats)
+
+    setAnimateStats(false)
+    setTimeout(() => {
+      setAnimateStats(true)
+    }, 50)
   }
 
   if (!isOpen) return null
@@ -206,12 +216,13 @@ export function PokemonModal({
   const normalAbilities = abilities?.filter(a => !a.is_hidden) ?? []
   const hiddenAbilities = abilities?.filter(a => a.is_hidden) ?? []
 
-  const hp = stats?.[0]?.base_stat ?? 0
-  const attack = stats?.[1]?.base_stat ?? 0
-  const defense = stats?.[2]?.base_stat ?? 0
-  const special_attack = stats?.[3]?.base_stat ?? 0
-  const special_defense = stats?.[4]?.base_stat ?? 0
-  const speed = stats?.[5]?.base_stat ?? 0
+  const displayStats = currentStats || stats
+  const hp = displayStats?.[0]?.base_stat ?? 0
+  const attack = displayStats?.[1]?.base_stat ?? 0
+  const defense = displayStats?.[2]?.base_stat ?? 0
+  const special_attack = displayStats?.[3]?.base_stat ?? 0
+  const special_defense = displayStats?.[4]?.base_stat ?? 0
+  const speed = displayStats?.[5]?.base_stat ?? 0
 
   return (
     <div
@@ -267,38 +278,44 @@ export function PokemonModal({
           <div className="modal-right">
             {forms.length > 1 && (
               <div className="modal-section forms-section">
-                <h3>Forms</h3>
+                <h3>Alternative Forms</h3>
                 {isLoadingForms ? (
                   <p className="loading-forms">Loading forms...</p>
                 ) : (
-                  <div className="forms-grid">
-                    {forms.map((form, index) => {
-                      const formSprite =
-                        form.sprites?.other?.home?.front_default ||
-                        form.sprites?.front_default
-                      return (
-                        <button
-                          key={form.name}
-                          className={`form-button ${
-                            index === selectedFormIndex ? 'active' : ''
-                          }`}
-                          onClick={() => handleFormSelect(index)}
-                          aria-label={`Switch to ${getFormDisplayName(form.name)}`}
-                        >
-                          {formSprite && (
-                            <img
-                              src={formSprite}
-                              alt={form.name}
-                              className="form-sprite"
-                            />
-                          )}
-                          <span className="form-name">
-                            {getFormDisplayName(form.name)}
-                          </span>
-                        </button>
-                      )
-                    })}
-                  </div>
+                  <>
+                    <p className="forms-description">
+                      Click on a form to view its sprite and stats
+                    </p>
+                    <div className="forms-grid">
+                      {forms.map((form, index) => {
+                        const formSprite =
+                          form.sprites?.other?.home?.front_default ||
+                          form.sprites?.front_default
+                        return (
+                          <button
+                            key={form.name}
+                            className={`form-button ${
+                              index === selectedFormIndex ? 'active' : ''
+                            }`}
+                            onClick={() => handleFormSelect(index)}
+                            aria-label={`Switch to ${getFormDisplayName(form.name)}`}
+                            aria-pressed={index === selectedFormIndex}
+                          >
+                            {formSprite && (
+                              <img
+                                src={formSprite}
+                                alt={form.name}
+                                className="form-sprite"
+                              />
+                            )}
+                            <span className="form-name">
+                              {getFormDisplayName(form.name)}
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </>
                 )}
               </div>
             )}

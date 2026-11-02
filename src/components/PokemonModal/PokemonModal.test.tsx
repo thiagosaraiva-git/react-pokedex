@@ -60,6 +60,14 @@ const mockCharizardFormData = {
     },
   },
   types: [{ type: { name: 'fire' } }, { type: { name: 'flying' } }],
+  stats: [
+    { base_stat: 78, stat: { name: 'hp' } },
+    { base_stat: 84, stat: { name: 'attack' } },
+    { base_stat: 78, stat: { name: 'defense' } },
+    { base_stat: 109, stat: { name: 'special-attack' } },
+    { base_stat: 85, stat: { name: 'special-defense' } },
+    { base_stat: 100, stat: { name: 'speed' } },
+  ],
 }
 
 const mockCharizardMegaXFormData = {
@@ -71,6 +79,14 @@ const mockCharizardMegaXFormData = {
     },
   },
   types: [{ type: { name: 'fire' } }, { type: { name: 'dragon' } }],
+  stats: [
+    { base_stat: 78, stat: { name: 'hp' } },
+    { base_stat: 130, stat: { name: 'attack' } },
+    { base_stat: 111, stat: { name: 'defense' } },
+    { base_stat: 130, stat: { name: 'special-attack' } },
+    { base_stat: 85, stat: { name: 'special-defense' } },
+    { base_stat: 100, stat: { name: 'speed' } },
+  ],
 }
 
 const mockCharizardMegaYFormData = {
@@ -82,6 +98,14 @@ const mockCharizardMegaYFormData = {
     },
   },
   types: [{ type: { name: 'fire' } }, { type: { name: 'flying' } }],
+  stats: [
+    { base_stat: 78, stat: { name: 'hp' } },
+    { base_stat: 104, stat: { name: 'attack' } },
+    { base_stat: 78, stat: { name: 'defense' } },
+    { base_stat: 159, stat: { name: 'special-attack' } },
+    { base_stat: 115, stat: { name: 'special-defense' } },
+    { base_stat: 100, stat: { name: 'speed' } },
+  ],
 }
 
 describe('PokemonModal Component', () => {
@@ -217,7 +241,7 @@ describe('PokemonModal Component', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText('Forms')).toBeInTheDocument()
+      expect(screen.getByText('Alternative Forms')).toBeInTheDocument()
     })
 
     await waitFor(() => {
@@ -254,7 +278,7 @@ describe('PokemonModal Component', () => {
     )
 
     await waitFor(() => {
-      expect(screen.queryByText('Forms')).not.toBeInTheDocument()
+      expect(screen.queryByText('Alternative Forms')).not.toBeInTheDocument()
     })
   })
 
@@ -278,7 +302,7 @@ describe('PokemonModal Component', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText('Forms')).toBeInTheDocument()
+      expect(screen.getByText('Alternative Forms')).toBeInTheDocument()
     })
 
     await waitFor(() => {
@@ -321,7 +345,7 @@ describe('PokemonModal Component', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText('Forms')).toBeInTheDocument()
+      expect(screen.getByText('Alternative Forms')).toBeInTheDocument()
     })
 
     await waitFor(() => {
@@ -360,7 +384,7 @@ describe('PokemonModal Component', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText('Forms')).toBeInTheDocument()
+      expect(screen.getByText('Alternative Forms')).toBeInTheDocument()
     })
 
     await waitFor(() => {
@@ -383,7 +407,7 @@ describe('PokemonModal Component', () => {
       expect(consoleSpy).toHaveBeenCalled()
     })
 
-    expect(screen.queryByText('Forms')).not.toBeInTheDocument()
+    expect(screen.queryByText('Alternative Forms')).not.toBeInTheDocument()
 
     consoleSpy.mockRestore()
   })
@@ -408,7 +432,7 @@ describe('PokemonModal Component', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText('Forms')).toBeInTheDocument()
+      expect(screen.getByText('Alternative Forms')).toBeInTheDocument()
     })
 
     await waitFor(() => {
@@ -417,5 +441,83 @@ describe('PokemonModal Component', () => {
       })
       expect(charizardButton).toHaveClass('active')
     })
+  })
+
+  it('should update stats when switching forms', async () => {
+    const mockAxiosGet = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('pokemon-species')) {
+        return Promise.resolve({ data: mockSpeciesData })
+      }
+      if (url.includes('10034')) {
+        return Promise.resolve({ data: mockCharizardMegaXFormData })
+      }
+      if (url.includes('10035')) {
+        return Promise.resolve({ data: mockCharizardMegaYFormData })
+      }
+      return Promise.resolve({ data: mockCharizardFormData })
+    })
+    ;(axios.get as any) = mockAxiosGet
+
+    render(
+      <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Alternative Forms')).toBeInTheDocument()
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('Charizard Mega X')).toBeInTheDocument()
+    })
+
+    const statsContainer = screen.getByText('Base Stats').nextElementSibling
+    expect(statsContainer).toHaveTextContent('84')
+
+    const megaXButton = screen.getByRole('button', {
+      name: /switch to charizard mega x/i,
+    })
+    await userEvent.click(megaXButton)
+
+    await waitFor(() => {
+      const updatedStatsContainer =
+        screen.getByText('Base Stats').nextElementSibling
+      expect(updatedStatsContainer).toHaveTextContent('130')
+    })
+  })
+
+  it('should have aria-pressed attribute on form buttons', async () => {
+    const mockAxiosGet = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('pokemon-species')) {
+        return Promise.resolve({ data: mockSpeciesData })
+      }
+      if (url.includes('10034')) {
+        return Promise.resolve({ data: mockCharizardMegaXFormData })
+      }
+      if (url.includes('10035')) {
+        return Promise.resolve({ data: mockCharizardMegaYFormData })
+      }
+      return Promise.resolve({ data: mockCharizardFormData })
+    })
+    ;(axios.get as any) = mockAxiosGet
+
+    render(
+      <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Alternative Forms')).toBeInTheDocument()
+    })
+
+    await waitFor(() => {
+      const charizardButton = screen.getByRole('button', {
+        name: /switch to charizard$/i,
+      })
+      expect(charizardButton).toHaveAttribute('aria-pressed', 'true')
+    })
+
+    const megaXButton = screen.getByRole('button', {
+      name: /switch to charizard mega x/i,
+    })
+    expect(megaXButton).toHaveAttribute('aria-pressed', 'false')
   })
 })
