@@ -40,9 +40,12 @@ export function PokemonModal({
 }: PokemonModalProps) {
   const modalRef = useRef<HTMLDivElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     if (!isOpen) return
+
+    previouslyFocusedElementRef.current = document.activeElement as HTMLElement
 
     closeButtonRef.current?.focus()
 
@@ -73,12 +76,10 @@ export function PokemonModal({
     document.addEventListener('keydown', handleEscape)
     document.addEventListener('keydown', handleTabKey)
 
-    const previouslyFocusedElement = document.activeElement as HTMLElement
-
     return () => {
       document.removeEventListener('keydown', handleEscape)
       document.removeEventListener('keydown', handleTabKey)
-      previouslyFocusedElement?.focus()
+      previouslyFocusedElementRef.current?.focus()
     }
   }, [isOpen, onClose])
 

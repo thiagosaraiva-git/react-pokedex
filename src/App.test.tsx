@@ -167,4 +167,35 @@ describe('PokemonModal', () => {
       expect(mockOnClose).not.toHaveBeenCalled()
     }
   })
+
+  it('should restore focus to previously focused element when closed', () => {
+    const { rerender } = render(
+      <>
+        <button data-testid="opener">Open Modal</button>
+        <PokemonModal isOpen={false} onClose={mockOnClose} {...mockPokemon} />
+      </>
+    )
+
+    const openerButton = screen.getByTestId('opener')
+    openerButton.focus()
+    expect(document.activeElement).toBe(openerButton)
+
+    rerender(
+      <>
+        <button data-testid="opener">Open Modal</button>
+        <PokemonModal isOpen={true} onClose={mockOnClose} {...mockPokemon} />
+      </>
+    )
+
+    expect(document.activeElement).not.toBe(openerButton)
+
+    rerender(
+      <>
+        <button data-testid="opener">Open Modal</button>
+        <PokemonModal isOpen={false} onClose={mockOnClose} {...mockPokemon} />
+      </>
+    )
+
+    expect(document.activeElement).toBe(openerButton)
+  })
 })
