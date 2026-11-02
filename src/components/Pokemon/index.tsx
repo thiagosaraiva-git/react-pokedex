@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, ChangeEvent } from 'react'
 import { Pokedex } from '../Pokedex'
+import { Loading } from '../Loading'
 import { api } from '../../services/api'
 import '../Pokemon/styles.scss'
 
@@ -184,16 +185,7 @@ export function PokemonCard() {
   }
 
   if (isLoading) {
-    return (
-      <div style={{ textAlign: 'center', padding: '2rem' }}>
-        <p>Loading Pokémon... {loadingProgress}%</p>
-        <progress
-          value={loadingProgress}
-          max="100"
-          style={{ width: '300px', height: '20px' }}
-        />
-      </div>
-    )
+    return <Loading progress={loadingProgress} />
   }
 
   return (
@@ -273,7 +265,9 @@ export function PokemonCard() {
         )}
       </section>
       <div ref={observerTarget} className="load-more-trigger">
-        {isLoadingMore && <p>Loading more Pokémon...</p>}
+        {isLoadingMore && (
+          <Loading variant="inline" message="Loading more Pokémon..." />
+        )}
       </div>
     </>
   )
