@@ -6,13 +6,47 @@
   width: 100%;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   position: fixed;
   z-index: 9999;
+  gap: 1rem;
+  padding: 0 0.5rem;
 
   img {
     width: 8rem;
     padding: 10px;
+    margin-left: auto;
   }
+}
+
+.hamburger-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  z-index: 10001;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  &:focus {
+    outline: 2px solid white;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+.hamburger-line {
+  width: 24px;
+  height: 3px;
+  background-color: white;
+  border-radius: 2px;
+  transition: all 0.3s;
 }
 
 .space {

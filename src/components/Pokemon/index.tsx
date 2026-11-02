@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, ChangeEvent } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Pokedex } from '../Pokedex'
 import { Loading } from '../Loading'
 import { api } from '../../services/api'
@@ -8,6 +8,13 @@ interface PokemonCardList {
   id: number
   name: string
   types: Array<{ type: { name: string } }>
+}
+
+interface PokemonCardProps {
+  nameFilter: string
+  generationFilter: string
+  typeFilter1: string
+  typeFilter2: string
 }
 
 const generationRanges = {
@@ -22,39 +29,19 @@ const generationRanges = {
   gen9: { min: 906, max: 1025 },
 }
 
-const allTypes = [
-  'normal',
-  'fire',
-  'water',
-  'electric',
-  'grass',
-  'ice',
-  'fighting',
-  'poison',
-  'ground',
-  'flying',
-  'psychic',
-  'bug',
-  'rock',
-  'ghost',
-  'dragon',
-  'dark',
-  'steel',
-  'fairy',
-]
-
 const BATCH_SIZE = 40
 const FETCH_CHUNK_SIZE = 100
 
-export function PokemonCard() {
+export function PokemonCard({
+  nameFilter,
+  generationFilter,
+  typeFilter1,
+  typeFilter2,
+}: PokemonCardProps) {
   const [pokemons, setPokemons] = useState<PokemonCardList[]>([])
   const [displayedPokemons, setDisplayedPokemons] = useState<PokemonCardList[]>(
     []
   )
-  const [nameFilter, setNameFilter] = useState('')
-  const [typeFilter1, setTypeFilter1] = useState('all')
-  const [typeFilter2, setTypeFilter2] = useState('all')
-  const [generationFilter, setGenerationFilter] = useState('all')
   const [isLoading, setIsLoading] = useState(true)
   const [loadingProgress, setLoadingProgress] = useState(0)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
@@ -176,76 +163,12 @@ export function PokemonCard() {
     }
   }, [displayedPokemons, isLoadingMore, getFilteredPokemons])
 
-  const handleResetFilters = () => {
-    setNameFilter('')
-    setTypeFilter1('all')
-    setTypeFilter2('all')
-    setGenerationFilter('all')
-    setDisplayCount(BATCH_SIZE)
-  }
-
   if (isLoading) {
     return <Loading progress={loadingProgress} />
   }
 
   return (
     <>
-      <div className="filters-container">
-        <input
-          type="text"
-          placeholder="Search by name"
-          value={nameFilter}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setNameFilter(e.target.value)
-          }
-        />
-        <select
-          value={generationFilter}
-          onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-            setGenerationFilter(e.target.value)
-          }
-        >
-          <option value="all">National Dex (All Gen)</option>
-          <option value="gen1">Gen 1 (1-151)</option>
-          <option value="gen2">Gen 2 (152-251)</option>
-          <option value="gen3">Gen 3 (252-386)</option>
-          <option value="gen4">Gen 4 (387-493)</option>
-          <option value="gen5">Gen 5 (494-649)</option>
-          <option value="gen6">Gen 6 (650-721)</option>
-          <option value="gen7">Gen 7 (722-809)</option>
-          <option value="gen8">Gen 8 (810-905)</option>
-          <option value="gen9">Gen 9 (906-1025)</option>
-        </select>
-        <select
-          value={typeFilter1}
-          onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-            setTypeFilter1(e.target.value)
-          }
-        >
-          <option value="all">Type 1 (Any)</option>
-          {allTypes.map(type => (
-            <option key={type} value={type}>
-              {type.charAt(0).toUpperCase() + type.slice(1)}
-            </option>
-          ))}
-        </select>
-        <select
-          value={typeFilter2}
-          onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-            setTypeFilter2(e.target.value)
-          }
-        >
-          <option value="all">Type 2 (Any)</option>
-          {allTypes.map(type => (
-            <option key={type} value={type}>
-              {type.charAt(0).toUpperCase() + type.slice(1)}
-            </option>
-          ))}
-        </select>
-        <button onClick={handleResetFilters} className="reset-button">
-          Clear Filters
-        </button>
-      </div>
       <div className="results-info">
         Showing {displayedPokemons.length} of {getFilteredPokemons().length}{' '}
         Pokémon

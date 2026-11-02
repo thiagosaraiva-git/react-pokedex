@@ -52,6 +52,13 @@ const mockPokemonData = [
 ]
 
 describe('PokemonCard Filter Logic', () => {
+  const defaultProps = {
+    nameFilter: '',
+    generationFilter: 'all',
+    typeFilter1: 'all',
+    typeFilter2: 'all',
+  }
+
   beforeEach(() => {
     vi.clearAllMocks()
 
@@ -79,7 +86,7 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should load and display Pokemon initially', async () => {
-    render(<PokemonCard />)
+    render(<PokemonCard {...defaultProps} />)
 
     expect(screen.getByTestId('loading')).toBeInTheDocument()
 
@@ -89,14 +96,13 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should filter by name search', async () => {
-    render(<PokemonCard />)
+    const { rerender } = render(<PokemonCard {...defaultProps} />)
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
     })
 
-    const searchInput = screen.getByPlaceholderText('Search by name')
-    await userEvent.type(searchInput, 'char')
+    rerender(<PokemonCard {...defaultProps} nameFilter="char" />)
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-charmander')).toBeInTheDocument()
@@ -105,14 +111,13 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should filter by generation (Gen 1)', async () => {
-    render(<PokemonCard />)
+    const { rerender } = render(<PokemonCard {...defaultProps} />)
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
     })
 
-    const genSelect = screen.getByDisplayValue('National Dex (All Gen)')
-    await userEvent.selectOptions(genSelect, 'gen1')
+    rerender(<PokemonCard {...defaultProps} generationFilter="gen1" />)
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
@@ -122,14 +127,13 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should filter by generation (Gen 2)', async () => {
-    render(<PokemonCard />)
+    const { rerender } = render(<PokemonCard {...defaultProps} />)
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-chikorita')).toBeInTheDocument()
     })
 
-    const genSelect = screen.getByDisplayValue('National Dex (All Gen)')
-    await userEvent.selectOptions(genSelect, 'gen2')
+    rerender(<PokemonCard {...defaultProps} generationFilter="gen2" />)
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-chikorita')).toBeInTheDocument()
@@ -139,14 +143,13 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should filter by single type', async () => {
-    render(<PokemonCard />)
+    const { rerender } = render(<PokemonCard {...defaultProps} />)
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-charmander')).toBeInTheDocument()
     })
 
-    const type1Select = screen.getByDisplayValue('Type 1 (Any)')
-    await userEvent.selectOptions(type1Select, 'fire')
+    rerender(<PokemonCard {...defaultProps} typeFilter1="fire" />)
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-charmander')).toBeInTheDocument()
@@ -156,17 +159,15 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should filter by dual type (both types required)', async () => {
-    render(<PokemonCard />)
+    const { rerender } = render(<PokemonCard {...defaultProps} />)
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
     })
 
-    const type1Select = screen.getByDisplayValue('Type 1 (Any)')
-    const type2Select = screen.getByDisplayValue('Type 2 (Any)')
-
-    await userEvent.selectOptions(type1Select, 'grass')
-    await userEvent.selectOptions(type2Select, 'poison')
+    rerender(
+      <PokemonCard {...defaultProps} typeFilter1="grass" typeFilter2="poison" />
+    )
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
@@ -176,17 +177,19 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should combine name search with generation filter', async () => {
-    render(<PokemonCard />)
+    const { rerender } = render(<PokemonCard {...defaultProps} />)
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
     })
 
-    const searchInput = screen.getByPlaceholderText('Search by name')
-    const genSelect = screen.getByDisplayValue('National Dex (All Gen)')
-
-    await userEvent.type(searchInput, 'turt')
-    await userEvent.selectOptions(genSelect, 'gen4')
+    rerender(
+      <PokemonCard
+        {...defaultProps}
+        nameFilter="turt"
+        generationFilter="gen4"
+      />
+    )
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-turtwig')).toBeInTheDocument()
@@ -195,17 +198,15 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should combine name search with type filter', async () => {
-    render(<PokemonCard />)
+    const { rerender } = render(<PokemonCard {...defaultProps} />)
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
     })
 
-    const searchInput = screen.getByPlaceholderText('Search by name')
-    const type1Select = screen.getByDisplayValue('Type 1 (Any)')
-
-    await userEvent.type(searchInput, 'chi')
-    await userEvent.selectOptions(type1Select, 'grass')
+    rerender(
+      <PokemonCard {...defaultProps} nameFilter="chi" typeFilter1="grass" />
+    )
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-chikorita')).toBeInTheDocument()
@@ -214,17 +215,19 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should combine generation and type filters', async () => {
-    render(<PokemonCard />)
+    const { rerender } = render(<PokemonCard {...defaultProps} />)
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
     })
 
-    const genSelect = screen.getByDisplayValue('National Dex (All Gen)')
-    const type1Select = screen.getByDisplayValue('Type 1 (Any)')
-
-    await userEvent.selectOptions(genSelect, 'gen1')
-    await userEvent.selectOptions(type1Select, 'grass')
+    rerender(
+      <PokemonCard
+        {...defaultProps}
+        generationFilter="gen1"
+        typeFilter1="grass"
+      />
+    )
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
@@ -233,39 +236,31 @@ describe('PokemonCard Filter Logic', () => {
     })
   })
 
-  it('should reset all filters when Clear Filters is clicked', async () => {
-    render(<PokemonCard />)
-
-    await waitFor(() => {
-      expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
-    })
-
-    const searchInput = screen.getByPlaceholderText('Search by name')
-    const genSelect = screen.getByDisplayValue('National Dex (All Gen)')
-    const type1Select = screen.getByDisplayValue('Type 1 (Any)')
-
-    await userEvent.type(searchInput, 'char')
-    await userEvent.selectOptions(genSelect, 'gen1')
-    await userEvent.selectOptions(type1Select, 'fire')
+  it('should reset filters when all are set to default', async () => {
+    const { rerender } = render(
+      <PokemonCard
+        nameFilter="char"
+        generationFilter="gen1"
+        typeFilter1="fire"
+        typeFilter2="all"
+      />
+    )
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-charmander')).toBeInTheDocument()
       expect(screen.queryByTestId('pokemon-bulbasaur')).not.toBeInTheDocument()
     })
 
-    const clearButton = screen.getByText('Clear Filters')
-    await userEvent.click(clearButton)
+    rerender(<PokemonCard {...defaultProps} />)
 
     await waitFor(() => {
-      expect(searchInput).toHaveValue('')
-      expect(genSelect).toHaveValue('all')
-      expect(type1Select).toHaveValue('all')
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
+      expect(screen.getByTestId('pokemon-charmander')).toBeInTheDocument()
     })
   })
 
   it('should display results count', async () => {
-    render(<PokemonCard />)
+    render(<PokemonCard {...defaultProps} />)
 
     await waitFor(() => {
       expect(screen.getByText(/Showing \d+ of \d+ Pokémon/)).toBeInTheDocument()
@@ -273,17 +268,15 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should display empty state when no results match filters', async () => {
-    render(<PokemonCard />)
+    const { rerender } = render(<PokemonCard {...defaultProps} />)
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
     })
 
-    const type1Select = screen.getByDisplayValue('Type 1 (Any)')
-    const type2Select = screen.getByDisplayValue('Type 2 (Any)')
-
-    await userEvent.selectOptions(type1Select, 'fire')
-    await userEvent.selectOptions(type2Select, 'water')
+    rerender(
+      <PokemonCard {...defaultProps} typeFilter1="fire" typeFilter2="water" />
+    )
 
     await waitFor(() => {
       expect(
@@ -296,17 +289,15 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should handle Fire + Water dual-type (no matches case)', async () => {
-    render(<PokemonCard />)
+    const { rerender } = render(<PokemonCard {...defaultProps} />)
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-charmander')).toBeInTheDocument()
     })
 
-    const type1Select = screen.getByDisplayValue('Type 1 (Any)')
-    const type2Select = screen.getByDisplayValue('Type 2 (Any)')
-
-    await userEvent.selectOptions(type1Select, 'fire')
-    await userEvent.selectOptions(type2Select, 'water')
+    rerender(
+      <PokemonCard {...defaultProps} typeFilter1="fire" typeFilter2="water" />
+    )
 
     await waitFor(() => {
       expect(screen.queryByTestId('pokemon-charmander')).not.toBeInTheDocument()
@@ -316,24 +307,23 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should match dual-type in any order (Water+Dark vs Dark+Water)', async () => {
-    render(<PokemonCard />)
+    const { rerender } = render(<PokemonCard {...defaultProps} />)
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-greninja')).toBeInTheDocument()
     })
 
-    const type1Select = screen.getByDisplayValue('Type 1 (Any)')
-    const type2Select = screen.getByDisplayValue('Type 2 (Any)')
-
-    await userEvent.selectOptions(type1Select, 'water')
-    await userEvent.selectOptions(type2Select, 'dark')
+    rerender(
+      <PokemonCard {...defaultProps} typeFilter1="water" typeFilter2="dark" />
+    )
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-greninja')).toBeInTheDocument()
     })
 
-    await userEvent.selectOptions(type1Select, 'dark')
-    await userEvent.selectOptions(type2Select, 'water')
+    rerender(
+      <PokemonCard {...defaultProps} typeFilter1="dark" typeFilter2="water" />
+    )
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-greninja')).toBeInTheDocument()
@@ -341,19 +331,20 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should combine name search with generation and type filters (triple combo)', async () => {
-    render(<PokemonCard />)
+    const { rerender } = render(<PokemonCard {...defaultProps} />)
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
     })
 
-    const searchInput = screen.getByPlaceholderText('Search by name')
-    const genSelect = screen.getByDisplayValue('National Dex (All Gen)')
-    const type1Select = screen.getByDisplayValue('Type 1 (Any)')
-
-    await userEvent.type(searchInput, 'bulba')
-    await userEvent.selectOptions(genSelect, 'gen1')
-    await userEvent.selectOptions(type1Select, 'grass')
+    rerender(
+      <PokemonCard
+        nameFilter="bulba"
+        generationFilter="gen1"
+        typeFilter1="grass"
+        typeFilter2="all"
+      />
+    )
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
@@ -387,7 +378,7 @@ describe('PokemonCard Filter Logic', () => {
 
     ;(apiModule.api.get as any) = mockGet
 
-    render(<PokemonCard />)
+    render(<PokemonCard {...defaultProps} />)
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-pokemon1')).toBeInTheDocument()
