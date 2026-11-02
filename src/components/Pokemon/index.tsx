@@ -266,7 +266,7 @@ export function PokemonCard() {
       </section>
       <div ref={observerTarget} className="load-more-trigger">
         {isLoadingMore && (
-          <Loading variant="inline" message="Loading more Pokémon..." />
+          <Loading variant="inline" message="Carregando mais…" />
         )}
       </div>
     </>

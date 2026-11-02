@@ -9,7 +9,7 @@ interface LoadingProps {
 export function Loading({
   variant = 'full',
   progress,
-  message = 'Loading Pokémon...',
+  message = 'Carregando…',
 }: LoadingProps) {
   if (variant === 'inline') {
     return (

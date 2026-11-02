@@ -5,13 +5,13 @@ import { Loading } from './index'
 describe('Loading Component', () => {
   it('should render full variant with default message', () => {
     render(<Loading />)
-    expect(screen.getByText('Loading Pokémon...')).toBeInTheDocument()
+    expect(screen.getByText('Carregando…')).toBeInTheDocument()
     expect(screen.getByLabelText('Loading')).toBeInTheDocument()
   })
 
   it('should render with custom message', () => {
-    render(<Loading message="Loading more Pokémon..." />)
-    expect(screen.getByText('Loading more Pokémon...')).toBeInTheDocument()
+    render(<Loading message="Carregando mais…" />)
+    expect(screen.getByText('Carregando mais…')).toBeInTheDocument()
   })
 
   it('should render progress bar when progress prop is provided', () => {

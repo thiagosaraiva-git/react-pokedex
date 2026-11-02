@@ -7,13 +7,13 @@
   }
 }
 
-@keyframes pulse {
+@keyframes pulse-opacity {
   0%,
   100% {
-    transform: scale(1);
+    opacity: 1;
   }
   50% {
-    transform: scale(1.05);
+    opacity: 0.6;
   }
 }
 
@@ -40,12 +40,12 @@
   position: relative;
   width: 60px;
   height: 60px;
-  animation: spin 1.5s linear infinite;
+  animation: spin 1.2s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .pokeball-spinner {
-    animation: pulse 2s ease-in-out infinite;
+    animation: pulse-opacity 2s ease-in-out infinite;
   }
 }
 
@@ -53,9 +53,9 @@
   position: absolute;
   width: 60px;
   height: 30px;
-  background: #e63946;
+  background: #ee1515;
   border-radius: 60px 60px 0 0;
-  border-bottom: 3px solid #1d3557;
+  border-bottom: 3px solid #1a1a1a;
 }
 
 .pokeball-bottom {
@@ -63,9 +63,9 @@
   bottom: 0;
   width: 60px;
   height: 30px;
-  background: #f1faee;
+  background: #ffffff;
   border-radius: 0 0 60px 60px;
-  border-top: 3px solid #1d3557;
+  border-top: 3px solid #1a1a1a;
 }
 
 .pokeball-center {
@@ -75,64 +75,45 @@
   transform: translate(-50%, -50%);
   width: 20px;
   height: 20px;
-  background: #f1faee;
-  border: 3px solid #1d3557;
+  background: #1a1a1a;
+  border: 3px solid #ffffff;
   border-radius: 50%;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 8px;
-    height: 8px;
-    background: #1d3557;
-    border-radius: 50%;
-  }
 }
 
 .loading-message {
   margin-top: 1.5rem;
   font-size: 1.1rem;
-  font-weight: 600;
-  color: #333;
+  font-weight: 400;
+  color: #666;
 }
 
 .loading-inline .loading-message {
   margin-top: 0;
   font-size: 0.95rem;
+  font-weight: 400;
   color: #666;
-  font-style: italic;
 }
 
 .loading-progress {
   margin-top: 0.5rem;
   font-size: 1.5rem;
-  font-weight: 700;
-  color: #1d3557;
+  font-weight: 400;
+  color: #666;
 }
 
 .progress-bar {
   width: 100%;
   max-width: 300px;
-  height: 20px;
-  background-color: #f1faee;
-  border-radius: 10px;
+  height: 6px;
+  background-color: #e8e8e8;
+  border-radius: 999px;
   overflow: hidden;
   margin-top: 1rem;
-  border: 2px solid #1d3557;
 }
 
 .progress-fill {
   height: 100%;
-  background: #e63946;
+  background: #ee1515;
   transition: width 0.3s ease-out;
-  border-radius: 8px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .progress-fill {
-    background: #e63946;
-  }
+  border-radius: 999px;
 }
