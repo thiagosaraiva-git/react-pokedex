@@ -7,13 +7,13 @@
   }
 }
 
-@keyframes pulse {
+@keyframes pulse-opacity {
   0%,
   100% {
-    transform: scale(1);
+    opacity: 1;
   }
   50% {
-    transform: scale(1.05);
+    opacity: 0.6;
   }
 }
 
@@ -40,12 +40,12 @@
   position: relative;
   width: 60px;
   height: 60px;
-  animation: spin 1.5s linear infinite;
+  animation: spin 1.2s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .pokeball-spinner {
-    animation: pulse 2s ease-in-out infinite;
+    animation: pulse-opacity 2s ease-in-out infinite;
   }
 }
 
@@ -53,10 +53,9 @@
   position: absolute;
   width: 60px;
   height: 30px;
-  background: linear-gradient(to bottom, #ff0000 0%, #cc0000 100%);
+  background: #ee1515;
   border-radius: 60px 60px 0 0;
-  border-bottom: 3px solid #333;
-  box-shadow: inset 0 -3px 8px rgba(0, 0, 0, 0.3);
+  border-bottom: 3px solid #1a1a1a;
 }
 
 .pokeball-bottom {
@@ -64,10 +63,9 @@
   bottom: 0;
   width: 60px;
   height: 30px;
-  background: linear-gradient(to top, #ffffff 0%, #f0f0f0 100%);
+  background: #ffffff;
   border-radius: 0 0 60px 60px;
-  border-top: 3px solid #333;
-  box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.2);
+  border-top: 3px solid #1a1a1a;
 }
 
 .pokeball-center {
@@ -77,81 +75,45 @@
   transform: translate(-50%, -50%);
   width: 20px;
   height: 20px;
-  background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
-  border: 3px solid #333;
+  background: #1a1a1a;
+  border: 3px solid #ffffff;
   border-radius: 50%;
-  box-shadow:
-    inset 0 2px 4px rgba(0, 0, 0, 0.2),
-    0 2px 4px rgba(0, 0, 0, 0.3);
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 8px;
-    height: 8px;
-    background: #ffffff;
-    border-radius: 50%;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  }
 }
 
 .loading-message {
   margin-top: 1.5rem;
   font-size: 1.1rem;
-  font-weight: 600;
-  color: #333;
+  font-weight: 400;
+  color: #666;
 }
 
 .loading-inline .loading-message {
   margin-top: 0;
   font-size: 0.95rem;
+  font-weight: 400;
   color: #666;
-  font-style: italic;
 }
 
 .loading-progress {
   margin-top: 0.5rem;
   font-size: 1.5rem;
-  font-weight: 700;
-  color: #cc0000;
+  font-weight: 400;
+  color: #666;
 }
 
 .progress-bar {
   width: 100%;
   max-width: 300px;
-  height: 20px;
-  background-color: #f0f0f0;
-  border-radius: 10px;
+  height: 6px;
+  background-color: #e8e8e8;
+  border-radius: 999px;
   overflow: hidden;
   margin-top: 1rem;
-  border: 2px solid #ddd;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(to right, #ff0000 0%, #cc0000 50%, #ff0000 100%);
-  background-size: 200% 100%;
-  animation: shimmer 2s linear infinite;
+  background: #ee1515;
   transition: width 0.3s ease-out;
-  border-radius: 8px;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .progress-fill {
-    animation: none;
-    background: #cc0000;
-  }
+  border-radius: 999px;
 }

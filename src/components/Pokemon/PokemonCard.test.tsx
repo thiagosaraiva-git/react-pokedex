@@ -21,7 +21,7 @@ vi.mock('../Pokedex', () => ({
 vi.mock('../Loading', () => ({
   Loading: ({ progress }: { progress?: number }) => (
     <div data-testid="loading">
-      {typeof progress === 'number' && `Loading Pokémon... ${progress}%`}
+      {typeof progress === 'number' && `Carregando… ${progress}%`}
     </div>
   ),
 }))
