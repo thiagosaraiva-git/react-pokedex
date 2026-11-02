@@ -1,8 +1,10 @@
 export function getCleanPokemonName(name: string): string {
   const formSuffixes = [
-    '-mega',
+    '-family-of-four',
+    '-family-of-three',
     '-mega-x',
     '-mega-y',
+    '-mega',
     '-alola',
     '-galar',
     '-hisui',
