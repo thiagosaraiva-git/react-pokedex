@@ -62,7 +62,7 @@ describe('PokemonCard Filter Logic', () => {
   it('should load and display Pokemon initially', async () => {
     render(<PokemonCard />);
     
-    expect(screen.getByText('Loading Pokemon...')).toBeInTheDocument();
+    expect(screen.getByText(/Loading Pokémon\.\.\./)).toBeInTheDocument();
     
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument();
