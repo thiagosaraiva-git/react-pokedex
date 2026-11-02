@@ -8,6 +8,10 @@ export function Header({ onMenuClick }: HeaderProps) {
   return (
     <header>
       <div className="pokedex-header">
+        <img
+          src="https://logodownload.org/wp-content/uploads/2017/08/pokemon-logo-8.png"
+          alt="Pokémon Logo"
+        />
         {onMenuClick && (
           <button
             className="hamburger-button"
@@ -20,10 +24,6 @@ export function Header({ onMenuClick }: HeaderProps) {
             <span className="hamburger-line" />
           </button>
         )}
-        <img
-          src="https://logodownload.org/wp-content/uploads/2017/08/pokemon-logo-8.png"
-          alt="Pokémon Logo"
-        />
       </div>
       <div className="space" />
     </header>
