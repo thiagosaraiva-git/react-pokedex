@@ -27,8 +27,8 @@
   animation: modalSlideIn 0.2s ease-out;
   background-image: url('../../img/pokeball.png');
   background-repeat: no-repeat;
-  background-position: right -30px top -30px;
-  background-size: 250px;
+  background-position: right 20px center;
+  background-size: 400px;
   position: relative;
 }
 
@@ -79,7 +79,7 @@
   }
 
   &:focus {
-    outline: 2px solid #0066cc;
+    outline: 2px solid #999;
     outline-offset: 2px;
   }
 }
@@ -115,6 +115,8 @@
   width: 12rem;
   height: 12rem;
   object-fit: contain;
+  margin: 0 auto;
+  display: block;
 }
 
 .modal-name {
@@ -199,7 +201,7 @@
   }
 
   &:focus {
-    outline: 2px solid #0066cc;
+    outline: 2px solid #999;
     outline-offset: 2px;
   }
 
@@ -269,6 +271,8 @@
         background-color: #f0f0f0;
         border-radius: 0.5rem;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) inset;
+        border: none;
+        appearance: none;
 
         &::-webkit-progress-bar {
           background-color: #f0f0f0;
@@ -278,25 +282,16 @@
         &::-webkit-progress-value {
           background-color: #4caf50;
           border-radius: 0.5rem;
-          animation: fillBar 0.8s ease-out;
+          transition: width 0.8s ease-out;
         }
 
         &::-moz-progress-bar {
           background-color: #4caf50;
           border-radius: 0.5rem;
-          animation: fillBar 0.8s ease-out;
+          transition: width 0.8s ease-out;
         }
       }
     }
-  }
-}
-
-@keyframes fillBar {
-  from {
-    width: 0;
-  }
-  to {
-    width: 100%;
   }
 }
 
