@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import useSound from 'use-sound'
 import clickSfx from '../../sounds/click.mp3'
 import { api } from '../../services/api'
+import { Loading } from '../Loading'
 import { PokemonStats } from '../PokemonStats'
 import { PokemonAbilities } from '../PokemonAbilities'
 import { PokemonImage } from '../PokemonImage'
@@ -53,7 +54,11 @@ export function Pokedex(props: { name: string }) {
     useSound(clickSfx)
 
   if (!pokemonData) {
-    return <div>Loading...</div>
+    return (
+      <li style={{ listStyle: 'none' }}>
+        <Loading variant="inline" message="" />
+      </li>
+    )
   }
 
   const { id, name, types, sprites, abilities, stats } = pokemonData

@@ -18,6 +18,13 @@ vi.mock('../Pokedex', () => ({
     <div data-testid={`pokemon-${name}`}>{name}</div>
   ),
 }))
+vi.mock('../Loading', () => ({
+  Loading: ({ progress }: { progress?: number }) => (
+    <div data-testid="loading">
+      {typeof progress === 'number' && `Loading Pokémon... ${progress}%`}
+    </div>
+  ),
+}))
 vi.mock('use-sound', () => ({
   default: () => [vi.fn(), { stop: vi.fn() }],
 }))
@@ -74,7 +81,7 @@ describe('PokemonCard Filter Logic', () => {
   it('should load and display Pokemon initially', async () => {
     render(<PokemonCard />)
 
-    expect(screen.getByText(/Loading Pokémon\.\.\./)).toBeInTheDocument()
+    expect(screen.getByTestId('loading')).toBeInTheDocument()
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
