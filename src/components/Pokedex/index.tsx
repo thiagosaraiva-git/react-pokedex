@@ -3,9 +3,8 @@ import useSound from 'use-sound'
 import clickSfx from '../../sounds/click.mp3'
 import { api } from '../../services/api'
 import { Loading } from '../Loading'
-import { PokemonStats } from '../PokemonStats'
-import { PokemonAbilities } from '../PokemonAbilities'
 import { PokemonImage } from '../PokemonImage'
+import { PokemonModal } from '../PokemonModal'
 
 interface PokedexType {
   type: { name: string }
@@ -36,7 +35,7 @@ interface PokedexEntry {
 
 export function Pokedex(props: { name: string }) {
   const [pokemonData, setPokemonData] = useState<PokedexEntry | null>(null)
-  const [flip, setFlip] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     const getPokedex = async () => {
@@ -64,29 +63,35 @@ export function Pokedex(props: { name: string }) {
   const { id, name, types, sprites, abilities, stats } = pokemonData
   const spriteUrl = sprites?.other?.home?.front_default ?? ''
 
-  function flipCard() {
-    setFlip(currentFlip => !currentFlip)
+  function openModal() {
+    setIsModalOpen(true)
   }
 
-  const flipCheck = flip ? 'active' : null
+  function closeModal() {
+    setIsModalOpen(false)
+  }
 
   return (
     <>
-      <a
-        href={`#${id}`}
-        onClick={flipCard}
+      <button
+        className="pokemon-card-button"
+        onClick={openModal}
         onMouseEnter={click}
-        onMouseLeave={flipCheck ? flipCard : click}
+        aria-label={`View details for ${name}`}
       >
-        {flipCheck ? (
-          <li>
-            <PokemonAbilities abilities={abilities} />
-            <PokemonStats stats={stats} />
-          </li>
-        ) : (
-          <PokemonImage id={id} name={name} sprite={spriteUrl} types={types} />
-        )}
-      </a>
+        <PokemonImage id={id} name={name} sprite={spriteUrl} types={types} />
+      </button>
+
+      <PokemonModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        id={id}
+        name={name}
+        sprite={spriteUrl}
+        types={types}
+        abilities={abilities}
+        stats={stats}
+      />
     </>
   )
 }
