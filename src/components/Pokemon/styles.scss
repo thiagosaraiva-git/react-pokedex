@@ -6,12 +6,11 @@
     justify-content: center;
     text-transform: capitalize;
 
-    a {
+    .pokemon-card-button {
       margin-right: 0.7rem;
       margin-bottom: 1rem;
       padding: 20px 15px;
       border-radius: 5px;
-      text-decoration: none;
       background-color: white;
       background-image: url('../../img/pokeball.png');
       background-repeat: no-repeat;
@@ -26,13 +25,20 @@
       box-shadow:
         rgba(0, 0, 0, 0.1) 0px 4px 6px -1px,
         rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
 
       &:hover {
-        cursor: pointer;
         opacity: 1;
         transform: scale(1.1);
         transition: 0.1s;
         z-index: 999;
+      }
+
+      &:focus {
+        outline: 2px solid #0066cc;
+        outline-offset: 2px;
       }
 
       li {
