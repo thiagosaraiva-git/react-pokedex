@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom'
-import { vi } from 'vitest'
+import { vi, beforeEach } from 'vitest'
 import axios from 'axios'
 
 const mockGet = vi.fn()
