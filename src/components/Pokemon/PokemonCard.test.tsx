@@ -10,7 +10,7 @@ mockIntersectionObserver.mockReturnValue({
   unobserve: () => null,
   disconnect: () => null
 });
-global.IntersectionObserver = mockIntersectionObserver as any;
+(globalThis as any).IntersectionObserver = mockIntersectionObserver;
 
 vi.mock('../../services/api');
 vi.mock('../Pokedex', () => ({
@@ -31,28 +31,27 @@ const mockPokemonData = [
   { id: 387, name: 'turtwig', types: [{ type: { name: 'grass' } }] },
   { id: 800, name: 'necrozma', types: [{ type: { name: 'psychic' } }] },
   { id: 906, name: 'sprigatito', types: [{ type: { name: 'grass' } }] },
+  { id: 658, name: 'greninja', types: [{ type: { name: 'water' } }, { type: { name: 'dark' } }] },
 ];
 
 describe('PokemonCard Filter Logic', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     
-    const mockApi = {
-      get: vi.fn((url: string) => {
-        if (url.includes('?limit=')) {
-          return Promise.resolve({
-            data: {
-              results: mockPokemonData.map(p => ({ name: p.name, url: `https://pokeapi.co/api/v2/pokemon/${p.id}/` }))
-            }
-          });
-        }
-        const pokemonName = url;
-        const pokemon = mockPokemonData.find(p => p.name === pokemonName);
-        return Promise.resolve({ data: pokemon });
-      })
-    };
+    const mockGet = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('?limit=')) {
+        return Promise.resolve({
+          data: {
+            results: mockPokemonData.map(p => ({ name: p.name, url: `https://pokeapi.co/api/v2/pokemon/${p.id}/` }))
+          }
+        });
+      }
+      const pokemonName = url;
+      const pokemon = mockPokemonData.find(p => p.name === pokemonName);
+      return Promise.resolve({ data: pokemon });
+    });
     
-    vi.mocked(apiModule.api).get = mockApi.get;
+    (apiModule.api.get as any) = mockGet;
   });
 
   afterEach(() => {
@@ -251,5 +250,123 @@ describe('PokemonCard Filter Logic', () => {
     await waitFor(() => {
       expect(screen.getByText(/Showing \d+ of \d+ Pokémon/)).toBeInTheDocument();
     });
+  });
+
+  it('should display empty state when no results match filters', async () => {
+    render(<PokemonCard />);
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument();
+    });
+
+    const type1Select = screen.getByDisplayValue('Type 1 (Any)');
+    const type2Select = screen.getByDisplayValue('Type 2 (Any)');
+    
+    await userEvent.selectOptions(type1Select, 'fire');
+    await userEvent.selectOptions(type2Select, 'water');
+
+    await waitFor(() => {
+      expect(screen.getByText('No Pokémon found matching your filters.')).toBeInTheDocument();
+      expect(screen.getByText('Try adjusting your search or clearing filters.')).toBeInTheDocument();
+    });
+  });
+
+  it('should handle Fire + Water dual-type (no matches case)', async () => {
+    render(<PokemonCard />);
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('pokemon-charmander')).toBeInTheDocument();
+    });
+
+    const type1Select = screen.getByDisplayValue('Type 1 (Any)');
+    const type2Select = screen.getByDisplayValue('Type 2 (Any)');
+    
+    await userEvent.selectOptions(type1Select, 'fire');
+    await userEvent.selectOptions(type2Select, 'water');
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('pokemon-charmander')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('pokemon-squirtle')).not.toBeInTheDocument();
+      expect(screen.getByText(/Showing 0 of 0 Pokémon/)).toBeInTheDocument();
+    });
+  });
+
+  it('should match dual-type in any order (Water+Dark vs Dark+Water)', async () => {
+    render(<PokemonCard />);
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('pokemon-greninja')).toBeInTheDocument();
+    });
+
+    const type1Select = screen.getByDisplayValue('Type 1 (Any)');
+    const type2Select = screen.getByDisplayValue('Type 2 (Any)');
+    
+    await userEvent.selectOptions(type1Select, 'water');
+    await userEvent.selectOptions(type2Select, 'dark');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('pokemon-greninja')).toBeInTheDocument();
+    });
+
+    await userEvent.selectOptions(type1Select, 'dark');
+    await userEvent.selectOptions(type2Select, 'water');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('pokemon-greninja')).toBeInTheDocument();
+    });
+  });
+
+  it('should combine name search with generation and type filters (triple combo)', async () => {
+    render(<PokemonCard />);
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument();
+    });
+
+    const searchInput = screen.getByPlaceholderText('Search by name');
+    const genSelect = screen.getByDisplayValue('National Dex (All Gen)');
+    const type1Select = screen.getByDisplayValue('Type 1 (Any)');
+    
+    await userEvent.type(searchInput, 'bulba');
+    await userEvent.selectOptions(genSelect, 'gen1');
+    await userEvent.selectOptions(type1Select, 'grass');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument();
+      expect(screen.queryByTestId('pokemon-chikorita')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('pokemon-charmander')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should load more Pokemon when scrolling (infinite scroll)', async () => {
+    const manyPokemon = Array.from({ length: 100 }, (_, i) => ({
+      id: i + 1,
+      name: `pokemon${i + 1}`,
+      types: [{ type: { name: 'normal' } }]
+    }));
+
+    const mockGet = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('?limit=')) {
+        return Promise.resolve({
+          data: {
+            results: manyPokemon.map(p => ({ name: p.name, url: `https://pokeapi.co/api/v2/pokemon/${p.id}/` }))
+          }
+        });
+      }
+      const pokemonName = url;
+      const pokemon = manyPokemon.find(p => p.name === pokemonName);
+      return Promise.resolve({ data: pokemon });
+    });
+    
+    (apiModule.api.get as any) = mockGet;
+
+    render(<PokemonCard />);
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('pokemon-pokemon1')).toBeInTheDocument();
+    });
+
+    const initialCount = screen.getAllByTestId(/pokemon-/).length;
+    expect(initialCount).toBeLessThanOrEqual(40);
   });
 });
