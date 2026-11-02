@@ -8,6 +8,11 @@ describe('getCleanPokemonName', () => {
     expect(getCleanPokemonName('mewtwo')).toBe('mewtwo')
   })
 
+  it('should remove family form suffixes (Maushold)', () => {
+    expect(getCleanPokemonName('maushold-family-of-four')).toBe('maushold')
+    expect(getCleanPokemonName('maushold-family-of-three')).toBe('maushold')
+  })
+
   it('should remove mega form suffixes', () => {
     expect(getCleanPokemonName('charizard-mega-x')).toBe('charizard')
     expect(getCleanPokemonName('charizard-mega-y')).toBe('charizard')
