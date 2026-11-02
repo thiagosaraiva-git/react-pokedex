@@ -177,18 +177,26 @@
 }
 
 .modal-section {
+  min-width: 0;
+
   h3 {
     font-size: 1.3rem;
     margin-bottom: 1rem;
     color: #333;
     border-bottom: 2px solid #f0f0f0;
     padding-bottom: 0.5rem;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
   }
 
   h4 {
     font-size: 1rem;
     margin: 1rem 0 0.5rem;
     color: #666;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
   }
 }
 
@@ -350,6 +358,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-width: 0;
 
   li {
     padding: 0.5rem 1rem;
@@ -357,6 +366,9 @@
     border-radius: 0.5rem;
     text-transform: capitalize;
     color: #333;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
   }
 
   &.hidden li {
@@ -371,9 +383,12 @@
 }
 
 .stats-container {
+  min-width: 0;
+
   li {
     list-style: none;
     margin-bottom: 0.75rem;
+    min-width: 0;
 
     p {
       display: flex;
@@ -381,6 +396,7 @@
       gap: 0.5rem;
       font-size: 1rem;
       color: #333;
+      min-width: 0;
 
       progress {
         flex: 1;
@@ -390,6 +406,7 @@
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) inset;
         border: none;
         appearance: none;
+        min-width: 0;
 
         &::-webkit-progress-bar {
           background-color: #f0f0f0;
@@ -424,9 +441,13 @@
   }
 
   .modal-content {
-    padding: 1.5rem;
+    padding: 1rem;
     max-width: 100%;
     min-height: auto;
+  }
+
+  .modal-layout {
+    gap: 1.5rem;
   }
 
   .modal-image {
@@ -450,6 +471,13 @@
 
   .form-name {
     font-size: 0.7rem;
+  }
+
+  .stats-container {
+    li p {
+      gap: 0.25rem;
+      font-size: 0.9rem;
+    }
   }
 }
 
