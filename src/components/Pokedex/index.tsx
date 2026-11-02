@@ -76,16 +76,14 @@ export function Pokedex(props: { name: string }) {
         transform: flip ? 'rotateY(180deg)' : 'rotateY(0deg)',
       }}
     >
-      <div style={{ transform: flip ? 'rotateY(180deg)' : 'rotateY(0deg)' }}>
-        {flip ? (
-          <li>
-            <PokemonAbilities abilities={abilities} />
-            <PokemonStats stats={stats} />
-          </li>
-        ) : (
-          <PokemonImage id={id} name={name} sprite={spriteUrl} types={types} />
-        )}
-      </div>
+      {flip ? (
+        <li style={{ listStyle: 'none' }}>
+          <PokemonAbilities abilities={abilities} />
+          <PokemonStats stats={stats} />
+        </li>
+      ) : (
+        <PokemonImage id={id} name={name} sprite={spriteUrl} types={types} />
+      )}
     </a>
   )
 }
