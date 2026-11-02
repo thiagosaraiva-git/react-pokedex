@@ -1,76 +1,77 @@
 .pokemon-namelist {
-    ul {
-        display: flex;
-        flex-wrap: wrap;
-        list-style: none;
-        justify-content: center;
-        text-transform: capitalize;
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    justify-content: center;
+    text-transform: capitalize;
 
-        a {
-            margin-right: 0.7rem;
-            margin-bottom: 1rem;
-            padding: 20px 15px;
-            border-radius: 5px;
-            text-decoration: none;
-            background-color: white;
-            background-image: url('../../img/pokeball.png');
-            background-repeat: no-repeat;
-            background-position: 100px -20px;
-            opacity: 0.7;
-            width: 250px;
-            color: black;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
+    a {
+      margin-right: 0.7rem;
+      margin-bottom: 1rem;
+      padding: 20px 15px;
+      border-radius: 5px;
+      text-decoration: none;
+      background-color: white;
+      background-image: url('../../img/pokeball.png');
+      background-repeat: no-repeat;
+      background-position: 100px -20px;
+      opacity: 0.7;
+      width: 250px;
+      color: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      box-shadow:
+        rgba(0, 0, 0, 0.1) 0px 4px 6px -1px,
+        rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
 
-            &:hover {
-                cursor: pointer;
-                opacity: 1;
-                transform: scale(1.1);
-                transition: 0.1s;
-                z-index: 999;
-            }
+      &:hover {
+        cursor: pointer;
+        opacity: 1;
+        transform: scale(1.1);
+        transition: 0.1s;
+        z-index: 999;
+      }
 
-            li {
-
-                img {
-                    width: 15rem;
-                }
-
-                h4 {
-                    margin-bottom: 5px;
-                }
-
-                p {
-                    display: inline-block;
-                    font-size: small;
-
-                    progress {
-                        background-color: #fff;
-                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
-                    }
-                }
-            }
+      li {
+        img {
+          width: 15rem;
         }
+
+        h4 {
+          margin-bottom: 5px;
+        }
+
+        p {
+          display: inline-block;
+          font-size: small;
+
+          progress {
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
+          }
+        }
+      }
     }
+  }
 }
 
 .filters-container {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
 }
 
-.filters-container input[type="text"],
+.filters-container input[type='text'],
 .filters-container select {
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.375rem;
-    border: 1px solid #ccc;
-    font-size: 1rem;
-    min-width: 150px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  min-width: 150px;
 }
