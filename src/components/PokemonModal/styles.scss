@@ -10,6 +10,7 @@
   justify-content: center;
   z-index: 10000;
   padding: 1rem;
+  overflow-y: auto;
 }
 
 .modal-content {
@@ -20,6 +21,7 @@
   max-height: 90vh;
   min-height: 500px;
   overflow-y: auto;
+  overflow-x: hidden;
   position: relative;
   padding: 2rem;
   box-shadow:
@@ -94,6 +96,7 @@
   display: flex;
   gap: 2rem;
   align-items: flex-start;
+  min-width: 0;
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -115,8 +118,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 12rem;
-  height: 12rem;
+  min-height: 16rem;
+  height: 16rem;
   width: 100%;
 }
 
@@ -125,11 +128,13 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  padding-top: 1rem;
+  min-width: 0;
 }
 
 .modal-image {
-  width: 12rem;
-  height: 12rem;
+  width: 16rem;
+  height: 16rem;
   object-fit: contain;
 }
 
@@ -172,18 +177,26 @@
 }
 
 .modal-section {
+  min-width: 0;
+
   h3 {
     font-size: 1.3rem;
     margin-bottom: 1rem;
     color: #333;
     border-bottom: 2px solid #f0f0f0;
     padding-bottom: 0.5rem;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
   }
 
   h4 {
     font-size: 1rem;
     margin: 1rem 0 0.5rem;
     color: #666;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
   }
 }
 
@@ -193,6 +206,8 @@
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border-radius: 0.75rem;
   border: 1px solid #dee2e6;
+  overflow: clip;
+  min-width: 0;
 
   h3 {
     font-size: 1.1rem;
@@ -225,7 +240,7 @@
   display: flex;
   gap: 1rem;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: clip;
   padding-bottom: 0.5rem;
 
   &::-webkit-scrollbar {
@@ -343,6 +358,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-width: 0;
 
   li {
     padding: 0.5rem 1rem;
@@ -350,6 +366,9 @@
     border-radius: 0.5rem;
     text-transform: capitalize;
     color: #333;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
   }
 
   &.hidden li {
@@ -364,9 +383,12 @@
 }
 
 .stats-container {
+  min-width: 0;
+
   li {
     list-style: none;
     margin-bottom: 0.75rem;
+    min-width: 0;
 
     p {
       display: flex;
@@ -374,6 +396,7 @@
       gap: 0.5rem;
       font-size: 1rem;
       color: #333;
+      min-width: 0;
 
       progress {
         flex: 1;
@@ -383,6 +406,7 @@
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) inset;
         border: none;
         appearance: none;
+        min-width: 0;
 
         &::-webkit-progress-bar {
           background-color: #f0f0f0;
@@ -412,8 +436,18 @@
 }
 
 @media (max-width: 640px) {
+  .modal-overlay {
+    padding: 0.5rem;
+  }
+
   .modal-content {
-    padding: 1.5rem;
+    padding: 1rem;
+    max-width: 100%;
+    min-height: auto;
+  }
+
+  .modal-layout {
+    gap: 1.5rem;
   }
 
   .modal-image {
@@ -421,12 +455,13 @@
     height: 10rem;
   }
 
-  .modal-name {
-    font-size: 1.5rem;
+  .modal-sprite-section {
+    min-height: 10rem;
+    height: 10rem;
   }
 
-  .forms-grid {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  .modal-name {
+    font-size: 1.5rem;
   }
 
   .form-sprite {
@@ -436,5 +471,45 @@
 
   .form-name {
     font-size: 0.7rem;
+  }
+
+  .stats-container {
+    li p {
+      gap: 0.25rem;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 0.25rem;
+  }
+
+  .modal-content {
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
+
+  .modal-layout {
+    gap: 1rem;
+  }
+
+  .modal-right {
+    width: 100%;
+  }
+
+  .forms-section {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+  }
+
+  .forms-grid {
+    gap: 0.75rem;
+  }
+
+  .form-button {
+    min-width: 120px;
+    padding: 0.75rem 0.5rem;
   }
 }
