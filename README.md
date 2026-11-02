@@ -11,7 +11,7 @@ Thanks to Rocketseat community, specially users Salomão Vasconcelos and Gabriel
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 22+
 - Yarn
 
 ### Installation
