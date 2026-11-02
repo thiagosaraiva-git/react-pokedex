@@ -236,10 +236,12 @@ export function PokemonModal({
                 <p>No Image</p>
               )}
             </div>
-            <h2 id="modal-title" className="modal-name">
-              {name.charAt(0).toUpperCase() + name.slice(1)}
-            </h2>
-            <p className="modal-id">#{id ?? 'N/A'}</p>
+            <div className="modal-header">
+              <p className="modal-id">#{id ?? 'N/A'}</p>
+              <h2 id="modal-title" className="modal-name">
+                {name.charAt(0).toUpperCase() + name.slice(1)}
+              </h2>
+            </div>
             <div className="modal-types">
               <span className={`type-badge ${type1}`}>
                 {type1 === 'N/A'
