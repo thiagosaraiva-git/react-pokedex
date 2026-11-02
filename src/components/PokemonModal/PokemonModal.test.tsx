@@ -108,7 +108,7 @@ describe('PokemonModal Component', () => {
     )
 
     expect(screen.getByRole('dialog')).toBeInTheDocument()
-    expect(screen.getByText('charizard')).toBeInTheDocument()
+    expect(screen.getByText('Charizard')).toBeInTheDocument()
     expect(screen.getByText('#6')).toBeInTheDocument()
     expect(screen.getByText('Abilities')).toBeInTheDocument()
     expect(screen.getByText('Base Stats')).toBeInTheDocument()
@@ -180,7 +180,7 @@ describe('PokemonModal Component', () => {
       <PokemonModal isOpen={true} onClose={onClose} {...mockPokemonData} />
     )
 
-    const modalContent = screen.getByText('charizard')
+    const modalContent = screen.getByText('Charizard')
     await userEvent.click(modalContent)
 
     expect(onClose).not.toHaveBeenCalled()
@@ -221,7 +221,8 @@ describe('PokemonModal Component', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByText('Charizard')).toBeInTheDocument()
+      const charizardElements = screen.getAllByText('Charizard')
+      expect(charizardElements.length).toBeGreaterThan(0)
       expect(screen.getByText('Charizard Mega X')).toBeInTheDocument()
       expect(screen.getByText('Charizard Mega Y')).toBeInTheDocument()
     })
@@ -327,7 +328,7 @@ describe('PokemonModal Component', () => {
       expect(screen.getByText('Charizard Mega X')).toBeInTheDocument()
     })
 
-    expect(screen.getByText('flying')).toBeInTheDocument()
+    expect(screen.getByText('Flying')).toBeInTheDocument()
 
     const megaXButton = screen.getByRole('button', {
       name: /switch to charizard mega x/i,
@@ -335,7 +336,7 @@ describe('PokemonModal Component', () => {
     await userEvent.click(megaXButton)
 
     await waitFor(() => {
-      expect(screen.getByText('dragon')).toBeInTheDocument()
+      expect(screen.getByText('Dragon')).toBeInTheDocument()
     })
   })
 

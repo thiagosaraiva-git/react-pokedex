@@ -85,7 +85,7 @@ describe('Pokedex Component', () => {
     render(<Pokedex name="charizard-mega-x" />)
 
     await waitFor(() => {
-      expect(screen.getByText('charizard')).toBeInTheDocument()
+      expect(screen.getByText('Charizard')).toBeInTheDocument()
     })
   })
 
@@ -178,7 +178,7 @@ describe('Pokedex Component', () => {
     render(<Pokedex name="charizard-mega-x" />)
 
     await waitFor(() => {
-      expect(screen.getByText('charizard')).toBeInTheDocument()
+      expect(screen.getByText('Charizard')).toBeInTheDocument()
     })
 
     const button = screen.getByRole('button', {

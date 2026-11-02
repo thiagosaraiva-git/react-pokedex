@@ -227,118 +227,132 @@ export function PokemonModal({
           ✕
         </button>
 
-        <div className="modal-header">
-          {currentSprite ? (
-            <img src={currentSprite} alt={name} className="modal-image" />
-          ) : (
-            <p>No Image</p>
-          )}
-          <h2 id="modal-title" className="modal-name">
-            {name}
-          </h2>
-          <p className="modal-id">#{id ?? 'N/A'}</p>
-          <div className="modal-types">
-            <span className={`type-badge ${type1}`}>{type1}</span>
-            {type2 && <span className={`type-badge ${type2}`}>{type2}</span>}
+        <div className="modal-layout">
+          <div className="modal-left">
+            <div className="modal-sprite-section">
+              {currentSprite ? (
+                <img src={currentSprite} alt={name} className="modal-image" />
+              ) : (
+                <p>No Image</p>
+              )}
+            </div>
+            <h2 id="modal-title" className="modal-name">
+              {name.charAt(0).toUpperCase() + name.slice(1)}
+            </h2>
+            <p className="modal-id">#{id ?? 'N/A'}</p>
+            <div className="modal-types">
+              <span className={`type-badge ${type1}`}>
+                {type1 === 'N/A'
+                  ? type1
+                  : type1.charAt(0).toUpperCase() + type1.slice(1)}
+              </span>
+              {type2 && (
+                <span className={`type-badge ${type2}`}>
+                  {type2.charAt(0).toUpperCase() + type2.slice(1)}
+                </span>
+              )}
+            </div>
           </div>
-        </div>
 
-        {forms.length > 1 && (
-          <div className="modal-section forms-section">
-            <h3>Forms</h3>
-            {isLoadingForms ? (
-              <p className="loading-forms">Loading forms...</p>
-            ) : (
-              <div className="forms-grid">
-                {forms.map((form, index) => {
-                  const formSprite =
-                    form.sprites?.other?.home?.front_default ||
-                    form.sprites?.front_default
-                  return (
-                    <button
-                      key={form.name}
-                      className={`form-button ${
-                        index === selectedFormIndex ? 'active' : ''
-                      }`}
-                      onClick={() => handleFormSelect(index)}
-                      aria-label={`Switch to ${getFormDisplayName(form.name)}`}
-                    >
-                      {formSprite && (
-                        <img
-                          src={formSprite}
-                          alt={form.name}
-                          className="form-sprite"
-                        />
-                      )}
-                      <span className="form-name">
-                        {getFormDisplayName(form.name)}
-                      </span>
-                    </button>
-                  )
-                })}
+          <div className="modal-right">
+            {forms.length > 1 && (
+              <div className="modal-section forms-section">
+                <h3>Forms</h3>
+                {isLoadingForms ? (
+                  <p className="loading-forms">Loading forms...</p>
+                ) : (
+                  <div className="forms-grid">
+                    {forms.map((form, index) => {
+                      const formSprite =
+                        form.sprites?.other?.home?.front_default ||
+                        form.sprites?.front_default
+                      return (
+                        <button
+                          key={form.name}
+                          className={`form-button ${
+                            index === selectedFormIndex ? 'active' : ''
+                          }`}
+                          onClick={() => handleFormSelect(index)}
+                          aria-label={`Switch to ${getFormDisplayName(form.name)}`}
+                        >
+                          {formSprite && (
+                            <img
+                              src={formSprite}
+                              alt={form.name}
+                              className="form-sprite"
+                            />
+                          )}
+                          <span className="form-name">
+                            {getFormDisplayName(form.name)}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             )}
-          </div>
-        )}
 
-        <div className="modal-body">
-          <div className="modal-section">
-            <h3>Abilities</h3>
-            {normalAbilities.length > 0 && (
-              <ul className="abilities-list">
-                {normalAbilities.map((ability, index) => (
-                  <li key={index}>{ability.ability.name}</li>
-                ))}
-              </ul>
-            )}
-            {hiddenAbilities.length > 0 && (
-              <>
-                <h4 className="hidden-abilities-title">Hidden Abilities</h4>
-                <ul className="abilities-list hidden">
-                  {hiddenAbilities.map((ability, index) => (
+            <div className="modal-section">
+              <h3>Abilities</h3>
+              {normalAbilities.length > 0 && (
+                <ul className="abilities-list">
+                  {normalAbilities.map((ability, index) => (
                     <li key={index}>{ability.ability.name}</li>
                   ))}
                 </ul>
-              </>
-            )}
-          </div>
+              )}
+              {hiddenAbilities.length > 0 && (
+                <>
+                  <h4 className="hidden-abilities-title">Hidden Abilities</h4>
+                  <ul className="abilities-list hidden">
+                    {hiddenAbilities.map((ability, index) => (
+                      <li key={index}>{ability.ability.name}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
 
-          <div className="modal-section">
-            <h3>Base Stats</h3>
-            <div className="stats-container">
-              <li>
-                <p>
-                  HP: <progress value={hp} max={maxStat} /> {hp}
-                </p>
-              </li>
-              <li>
-                <p>
-                  Attack: <progress value={attack} max={maxStat} /> {attack}
-                </p>
-              </li>
-              <li>
-                <p>
-                  Defense: <progress value={defense} max={maxStat} /> {defense}
-                </p>
-              </li>
-              <li>
-                <p>
-                  Sp. Attack: <progress value={special_attack} max={maxStat} />{' '}
-                  {special_attack}
-                </p>
-              </li>
-              <li>
-                <p>
-                  Sp. Defense:{' '}
-                  <progress value={special_defense} max={maxStat} />{' '}
-                  {special_defense}
-                </p>
-              </li>
-              <li>
-                <p>
-                  Speed: <progress value={speed} max={maxStat} /> {speed}
-                </p>
-              </li>
+            <div className="modal-section">
+              <h3>Base Stats</h3>
+              <div className="stats-container">
+                <li>
+                  <p>
+                    HP: <progress value={hp} max={maxStat} /> {hp}
+                  </p>
+                </li>
+                <li>
+                  <p>
+                    Attack: <progress value={attack} max={maxStat} /> {attack}
+                  </p>
+                </li>
+                <li>
+                  <p>
+                    Defense: <progress value={defense} max={maxStat} />{' '}
+                    {defense}
+                  </p>
+                </li>
+                <li>
+                  <p>
+                    Sp. Attack:{' '}
+                    <progress value={special_attack} max={maxStat} />{' '}
+                    {special_attack}
+                  </p>
+                </li>
+                <li>
+                  <p>
+                    Sp. Defense:{' '}
+                    <progress value={special_defense} max={maxStat} />{' '}
+                    {special_defense}
+                  </p>
+                </li>
+                <li>
+                  <p>
+                    Speed: <progress value={speed} max={maxStat} /> {speed}
+                  </p>
+                </li>
+              </div>
             </div>
           </div>
         </div>
