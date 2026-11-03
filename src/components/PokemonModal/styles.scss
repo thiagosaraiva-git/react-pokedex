@@ -297,7 +297,7 @@
     background-color: #f8f9fa;
     border-color: #adb5bd;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
     &::before {
       opacity: 1;
@@ -313,7 +313,7 @@
   &.active {
     background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
     border-color: #2196f3;
-    box-shadow: 0 4px 16px rgba(33, 150, 243, 0.4);
+    box-shadow: 0 3px 10px rgba(33, 150, 243, 0.25);
     transform: scale(1.05);
 
     &::before {
