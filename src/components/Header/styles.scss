@@ -18,6 +18,13 @@
   }
 }
 
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: auto;
+}
+
 .hamburger-button {
   background: none;
   border: none;
@@ -28,7 +35,6 @@
   gap: 0.35rem;
   z-index: 10001;
   transition: transform 0.2s;
-  margin-left: auto;
   margin-right: 0.5rem;
 
   &:hover {

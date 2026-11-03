@@ -2,9 +2,14 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { PokemonModal } from './index'
+import { LanguageProvider } from '../../contexts/LanguageContext'
 import axios from 'axios'
 
 vi.mock('axios')
+
+const renderWithProvider = (ui: React.ReactElement) => {
+  return render(<LanguageProvider>{ui}</LanguageProvider>)
+}
 
 const mockPokemonData = {
   id: 6,
@@ -111,6 +116,36 @@ const mockCharizardMegaYFormData = {
 describe('PokemonModal Component', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    ;(axios.get as any) = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('/type/')) {
+        return Promise.resolve({
+          data: {
+            names: [{ language: { name: 'en' }, name: url.split('/').pop() }],
+          },
+        })
+      }
+      if (url.includes('/ability/')) {
+        return Promise.resolve({
+          data: {
+            names: [{ language: { name: 'en' }, name: url.split('/').pop() }],
+          },
+        })
+      }
+      if (url.includes('/pokemon-species/')) {
+        return Promise.resolve({ data: mockSpeciesData })
+      }
+      if (url.includes('/pokemon/')) {
+        const name = url.split('/').filter(Boolean).pop()
+        if (name === '10034') {
+          return Promise.resolve({ data: mockCharizardMegaXFormData })
+        }
+        if (name === '10035') {
+          return Promise.resolve({ data: mockCharizardMegaYFormData })
+        }
+        return Promise.resolve({ data: mockPokemonData })
+      }
+      return Promise.reject(new Error('Unknown URL'))
+    })
   })
 
   afterEach(async () => {
@@ -119,7 +154,7 @@ describe('PokemonModal Component', () => {
   })
 
   it('should not render when isOpen is false', () => {
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={false} onClose={vi.fn()} {...mockPokemonData} />
     )
 
@@ -127,7 +162,7 @@ describe('PokemonModal Component', () => {
   })
 
   it('should render modal with pokemon details when isOpen is true', () => {
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
     )
 
@@ -139,7 +174,7 @@ describe('PokemonModal Component', () => {
   })
 
   it('should display abilities correctly', () => {
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
     )
 
@@ -157,7 +192,7 @@ describe('PokemonModal Component', () => {
     })
     ;(axios.get as any) = mockAxiosGet
 
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
     )
 
@@ -176,7 +211,7 @@ describe('PokemonModal Component', () => {
 
   it('should close modal when close button is clicked', async () => {
     const onClose = vi.fn()
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={onClose} {...mockPokemonData} />
     )
 
@@ -188,7 +223,7 @@ describe('PokemonModal Component', () => {
 
   it('should close modal when overlay is clicked', async () => {
     const onClose = vi.fn()
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={onClose} {...mockPokemonData} />
     )
 
@@ -200,7 +235,7 @@ describe('PokemonModal Component', () => {
 
   it('should not close modal when content is clicked', async () => {
     const onClose = vi.fn()
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={onClose} {...mockPokemonData} />
     )
 
@@ -212,7 +247,7 @@ describe('PokemonModal Component', () => {
 
   it('should close modal when Escape key is pressed', async () => {
     const onClose = vi.fn()
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={onClose} {...mockPokemonData} />
     )
 
@@ -236,7 +271,7 @@ describe('PokemonModal Component', () => {
     })
     ;(axios.get as any) = mockAxiosGet
 
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
     )
 
@@ -273,7 +308,7 @@ describe('PokemonModal Component', () => {
     })
     ;(axios.get as any) = mockAxiosGet
 
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
     )
 
@@ -297,7 +332,7 @@ describe('PokemonModal Component', () => {
     })
     ;(axios.get as any) = mockAxiosGet
 
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
     )
 
@@ -340,7 +375,7 @@ describe('PokemonModal Component', () => {
     })
     ;(axios.get as any) = mockAxiosGet
 
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
     )
 
@@ -379,7 +414,7 @@ describe('PokemonModal Component', () => {
     })
     ;(axios.get as any) = mockAxiosGet
 
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
     )
 
@@ -399,7 +434,7 @@ describe('PokemonModal Component', () => {
       .mockRejectedValue(new Error('Failed to fetch forms'))
     ;(axios.get as any) = mockAxiosGet
 
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
     )
 
@@ -427,7 +462,7 @@ describe('PokemonModal Component', () => {
     })
     ;(axios.get as any) = mockAxiosGet
 
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
     )
 
@@ -458,7 +493,7 @@ describe('PokemonModal Component', () => {
     })
     ;(axios.get as any) = mockAxiosGet
 
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
     )
 
@@ -500,7 +535,7 @@ describe('PokemonModal Component', () => {
     })
     ;(axios.get as any) = mockAxiosGet
 
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
     )
 

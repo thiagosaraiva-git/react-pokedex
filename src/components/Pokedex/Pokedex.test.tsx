@@ -2,12 +2,24 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Pokedex } from './index'
+import { LanguageProvider } from '../../contexts/LanguageContext'
 import * as apiModule from '../../services/api'
+import axios from 'axios'
 
-vi.mock('../../services/api')
+vi.mock('axios')
 vi.mock('use-sound', () => ({
   default: () => [vi.fn(), { stop: vi.fn() }],
 }))
+
+vi.mock('../../services/api', () => ({
+  api: {
+    get: vi.fn(),
+  },
+}))
+
+const renderWithProvider = (ui: React.ReactElement) => {
+  return render(<LanguageProvider>{ui}</LanguageProvider>)
+}
 
 const mockPokemonData = {
   id: 6,
@@ -32,6 +44,16 @@ const mockPokemonData = {
     { base_stat: 85, stat: { name: 'special-defense' } },
     { base_stat: 100, stat: { name: 'speed' } },
   ],
+  species: {
+    url: 'https://pokeapi.co/api/v2/pokemon-species/6/',
+  },
+}
+
+const mockSpeciesData = {
+  names: [
+    { language: { name: 'en' }, name: 'Charizard' },
+    { language: { name: 'ja' }, name: 'リザードン' },
+  ],
 }
 
 const mockCharizardMegaXData = {
@@ -54,11 +76,15 @@ const mockCharizardMegaXData = {
     { base_stat: 85, stat: { name: 'special-defense' } },
     { base_stat: 100, stat: { name: 'speed' } },
   ],
+  species: {
+    url: 'https://pokeapi.co/api/v2/pokemon-species/6/',
+  },
 }
 
 describe('Pokedex Component', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    ;(axios.get as any) = vi.fn().mockResolvedValue({ data: mockSpeciesData })
   })
 
   afterEach(async () => {
@@ -70,9 +96,9 @@ describe('Pokedex Component', () => {
     const mockGet = vi.fn().mockImplementation(() => {
       return new Promise(() => {})
     })
-    ;(apiModule.api.get as any) = mockGet
+    vi.spyOn(apiModule.api, 'get').mockImplementation(mockGet)
 
-    render(<Pokedex name="charizard" />)
+    renderWithProvider(<Pokedex name="charizard" />)
     expect(screen.getByLabelText('Loading')).toBeInTheDocument()
   })
 
@@ -80,9 +106,9 @@ describe('Pokedex Component', () => {
     const mockGet = vi.fn().mockImplementation(() => {
       return Promise.resolve({ data: mockCharizardMegaXData })
     })
-    ;(apiModule.api.get as any) = mockGet
+    vi.spyOn(apiModule.api, 'get').mockImplementation(mockGet)
 
-    render(<Pokedex name="charizard-mega-x" />)
+    renderWithProvider(<Pokedex name="charizard-mega-x" />)
 
     await waitFor(() => {
       expect(screen.getByText('Charizard')).toBeInTheDocument()
@@ -93,9 +119,9 @@ describe('Pokedex Component', () => {
     const mockGet = vi.fn().mockImplementation(() => {
       return Promise.resolve({ data: mockPokemonData })
     })
-    ;(apiModule.api.get as any) = mockGet
+    vi.spyOn(apiModule.api, 'get').mockImplementation(mockGet)
 
-    render(<Pokedex name="charizard" />)
+    renderWithProvider(<Pokedex name="charizard" />)
 
     await waitFor(() => {
       const button = screen.getByRole('button', {
@@ -105,7 +131,7 @@ describe('Pokedex Component', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByAltText('charizard')).toBeInTheDocument()
+      expect(screen.getByAltText(/charizard/i)).toBeInTheDocument()
     })
   })
 
@@ -113,9 +139,9 @@ describe('Pokedex Component', () => {
     const mockGet = vi.fn().mockImplementation(() => {
       return Promise.resolve({ data: mockPokemonData })
     })
-    ;(apiModule.api.get as any) = mockGet
+    vi.spyOn(apiModule.api, 'get').mockImplementation(mockGet)
 
-    render(<Pokedex name="charizard" />)
+    renderWithProvider(<Pokedex name="charizard" />)
 
     await waitFor(() => {
       const button = screen.getByRole('button', {
@@ -141,9 +167,9 @@ describe('Pokedex Component', () => {
     const mockGet = vi.fn().mockImplementation(() => {
       return Promise.resolve({ data: mockPokemonData })
     })
-    ;(apiModule.api.get as any) = mockGet
+    vi.spyOn(apiModule.api, 'get').mockImplementation(mockGet)
 
-    render(<Pokedex name="charizard" />)
+    renderWithProvider(<Pokedex name="charizard" />)
 
     await waitFor(() => {
       const button = screen.getByRole('button', {
@@ -173,9 +199,9 @@ describe('Pokedex Component', () => {
     const mockGet = vi.fn().mockImplementation(() => {
       return Promise.resolve({ data: mockCharizardMegaXData })
     })
-    ;(apiModule.api.get as any) = mockGet
+    vi.spyOn(apiModule.api, 'get').mockImplementation(mockGet)
 
-    render(<Pokedex name="charizard-mega-x" />)
+    renderWithProvider(<Pokedex name="charizard-mega-x" />)
 
     await waitFor(() => {
       expect(screen.getByText('Charizard')).toBeInTheDocument()
@@ -190,9 +216,9 @@ describe('Pokedex Component', () => {
   it('should handle API errors gracefully', async () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     const mockGet = vi.fn().mockRejectedValue(new Error('API Error'))
-    ;(apiModule.api.get as any) = mockGet
+    vi.spyOn(apiModule.api, 'get').mockImplementation(mockGet)
 
-    render(<Pokedex name="invalid-pokemon" />)
+    renderWithProvider(<Pokedex name="invalid-pokemon" />)
 
     await waitFor(() => {
       expect(consoleSpy).toHaveBeenCalledWith(

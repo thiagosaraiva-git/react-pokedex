@@ -2,6 +2,11 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { PokemonModal } from '../src/components/PokemonModal'
+import { LanguageProvider } from '../src/contexts/LanguageContext'
+
+const renderWithProvider = (ui: React.ReactElement) => {
+  return render(<LanguageProvider>{ui}</LanguageProvider>)
+}
 
 describe('PokemonModal', () => {
   const mockPokemon = {
@@ -26,15 +31,15 @@ describe('PokemonModal', () => {
   const mockOnClose = vi.fn()
 
   it('should not render when isOpen is false', () => {
-    const { container } = render(
+    const { container } = renderWithProvider(
       <PokemonModal isOpen={false} onClose={mockOnClose} {...mockPokemon} />
     )
 
-    expect(container.firstChild).toBeNull()
+    expect(container.querySelector('.modal-overlay')).toBeNull()
   })
 
   it('should render with Pokemon details when isOpen is true', () => {
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={mockOnClose} {...mockPokemon} />
     )
 
@@ -42,7 +47,7 @@ describe('PokemonModal', () => {
   })
 
   it('should display Pokemon name, id, and types', () => {
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={mockOnClose} {...mockPokemon} />
     )
 
@@ -52,7 +57,7 @@ describe('PokemonModal', () => {
   })
 
   it('should separate normal and hidden abilities', () => {
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={mockOnClose} {...mockPokemon} />
     )
 
@@ -62,7 +67,7 @@ describe('PokemonModal', () => {
   })
 
   it('should display base stats', () => {
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={mockOnClose} {...mockPokemon} />
     )
 
@@ -72,7 +77,7 @@ describe('PokemonModal', () => {
   })
 
   it('should have proper ARIA attributes', () => {
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={mockOnClose} {...mockPokemon} />
     )
 
@@ -83,7 +88,7 @@ describe('PokemonModal', () => {
 
   it('should call onClose when overlay is clicked', () => {
     mockOnClose.mockClear()
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={mockOnClose} {...mockPokemon} />
     )
 
@@ -94,7 +99,7 @@ describe('PokemonModal', () => {
 
   it('should call onClose when close button is clicked', () => {
     mockOnClose.mockClear()
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={mockOnClose} {...mockPokemon} />
     )
 
@@ -105,7 +110,7 @@ describe('PokemonModal', () => {
 
   it('should call onClose when Escape key is pressed', () => {
     mockOnClose.mockClear()
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={mockOnClose} {...mockPokemon} />
     )
 
@@ -119,7 +124,7 @@ describe('PokemonModal', () => {
       types: [{ type: { name: 'water' } }, { type: { name: 'flying' } }],
     }
 
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={mockOnClose} {...dualTypePokemon} />
     )
 
@@ -133,7 +138,7 @@ describe('PokemonModal', () => {
       abilities: [{ ability: { name: 'overgrow' }, is_hidden: false }],
     }
 
-    render(
+    renderWithProvider(
       <PokemonModal
         isOpen={true}
         onClose={mockOnClose}
@@ -146,7 +151,7 @@ describe('PokemonModal', () => {
   })
 
   it('should display image with proper alt text', () => {
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={mockOnClose} {...mockPokemon} />
     )
 
@@ -157,7 +162,7 @@ describe('PokemonModal', () => {
 
   it('should not propagate click from modal content to overlay', () => {
     mockOnClose.mockClear()
-    render(
+    renderWithProvider(
       <PokemonModal isOpen={true} onClose={mockOnClose} {...mockPokemon} />
     )
 
@@ -169,7 +174,7 @@ describe('PokemonModal', () => {
   })
 
   it('should restore focus to previously focused element when closed', () => {
-    const { rerender } = render(
+    const { rerender } = renderWithProvider(
       <>
         <button data-testid="opener">Open Modal</button>
         <PokemonModal isOpen={false} onClose={mockOnClose} {...mockPokemon} />
@@ -181,19 +186,19 @@ describe('PokemonModal', () => {
     expect(document.activeElement).toBe(openerButton)
 
     rerender(
-      <>
+      <LanguageProvider>
         <button data-testid="opener">Open Modal</button>
         <PokemonModal isOpen={true} onClose={mockOnClose} {...mockPokemon} />
-      </>
+      </LanguageProvider>
     )
 
     expect(document.activeElement).not.toBe(openerButton)
 
     rerender(
-      <>
+      <LanguageProvider>
         <button data-testid="opener">Open Modal</button>
         <PokemonModal isOpen={false} onClose={mockOnClose} {...mockPokemon} />
-      </>
+      </LanguageProvider>
     )
 
     expect(document.activeElement).toBe(openerButton)
