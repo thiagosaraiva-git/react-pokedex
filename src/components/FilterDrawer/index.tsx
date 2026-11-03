@@ -13,6 +13,7 @@ interface FilterDrawerProps {
   onTypeFilter1Change: (value: string) => void
   onTypeFilter2Change: (value: string) => void
   onResetFilters: () => void
+  hasActiveFilters: boolean
 }
 
 const allTypes = [
@@ -48,6 +49,7 @@ export function FilterDrawer({
   onTypeFilter1Change,
   onTypeFilter2Change,
   onResetFilters,
+  hasActiveFilters,
 }: FilterDrawerProps) {
   const drawerRef = useRef<HTMLDivElement>(null)
 
@@ -181,8 +183,10 @@ export function FilterDrawer({
               onResetFilters()
               onClose()
             }}
+            disabled={!hasActiveFilters}
+            aria-label="Limpar filtro"
           >
-            Limpar filtros
+            Limpar filtro
           </button>
         </div>
       </div>
