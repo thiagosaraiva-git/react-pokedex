@@ -22,6 +22,7 @@ describe('FilterDrawer', () => {
     onTypeFilter1Change: mockOnTypeFilter1Change,
     onTypeFilter2Change: mockOnTypeFilter2Change,
     onResetFilters: mockOnResetFilters,
+    hasActiveFilters: false,
   }
 
   beforeEach(() => {
@@ -81,8 +82,8 @@ describe('FilterDrawer', () => {
   })
 
   it('should call onResetFilters and onClose when clear button is clicked', () => {
-    render(<FilterDrawer {...defaultProps} />)
-    const clearButton = screen.getByText('Limpar filtros')
+    render(<FilterDrawer {...defaultProps} hasActiveFilters={true} />)
+    const clearButton = screen.getByText('Limpar filtro')
     fireEvent.click(clearButton)
     expect(mockOnResetFilters).toHaveBeenCalledTimes(1)
     expect(mockOnClose).toHaveBeenCalledTimes(1)
@@ -110,6 +111,7 @@ describe('FilterDrawer', () => {
       generationFilter: 'gen2',
       typeFilter1: 'fire',
       typeFilter2: 'flying',
+      hasActiveFilters: true,
     }
     render(<FilterDrawer {...propsWithFilters} />)
 
@@ -126,5 +128,25 @@ describe('FilterDrawer', () => {
     expect(generationSelect.value).toBe('gen2')
     expect(type1Select.value).toBe('fire')
     expect(type2Select.value).toBe('flying')
+  })
+
+  it('should disable clear button when no filters are active', () => {
+    render(<FilterDrawer {...defaultProps} hasActiveFilters={false} />)
+    const clearButton = screen.getByLabelText('Limpar filtro')
+    expect(clearButton).toBeDisabled()
+  })
+
+  it('should enable clear button when filters are active', () => {
+    render(<FilterDrawer {...defaultProps} hasActiveFilters={true} />)
+    const clearButton = screen.getByLabelText('Limpar filtro')
+    expect(clearButton).toBeEnabled()
+  })
+
+  it('should not call onResetFilters when clear button is clicked while disabled', () => {
+    render(<FilterDrawer {...defaultProps} hasActiveFilters={false} />)
+    const clearButton = screen.getByLabelText('Limpar filtro')
+    fireEvent.click(clearButton)
+    expect(mockOnResetFilters).not.toHaveBeenCalled()
+    expect(mockOnClose).not.toHaveBeenCalled()
   })
 })

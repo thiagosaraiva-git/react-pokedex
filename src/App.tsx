@@ -17,6 +17,12 @@ function App() {
     setGenerationFilter('all')
   }
 
+  const hasActiveFilters =
+    nameFilter !== '' ||
+    generationFilter !== 'all' ||
+    typeFilter1 !== 'all' ||
+    typeFilter2 !== 'all'
+
   return (
     <>
       <Header onMenuClick={() => setIsDrawerOpen(true)} />
@@ -32,6 +38,7 @@ function App() {
         onTypeFilter1Change={setTypeFilter1}
         onTypeFilter2Change={setTypeFilter2}
         onResetFilters={handleResetFilters}
+        hasActiveFilters={hasActiveFilters}
       />
       <PokemonCard
         nameFilter={nameFilter}
