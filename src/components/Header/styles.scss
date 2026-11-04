@@ -1,10 +1,19 @@
+.hero-banner,
+.hero-banner * {
+  box-sizing: border-box;
+}
+
 .hero-banner {
   position: fixed;
   top: 0;
   left: 0;
+  right: 0;
   width: 100%;
+  max-width: 100%;
   min-height: 200px;
   z-index: 9999;
+  display: flex;
+  align-items: stretch;
   box-shadow:
     0 4px 6px rgba(0, 0, 0, 0.1),
     0 8px 20px rgba(0, 0, 0, 0.15);
@@ -20,50 +29,56 @@
 
 .hero-background {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.hero-background-image {
+  display: block;
   width: 100%;
   height: 100%;
-  background:
-    linear-gradient(
-      135deg,
-      rgba(255, 0, 0, 0.95) 0%,
-      rgba(204, 0, 0, 0.9) 35%,
-      rgba(139, 0, 0, 0.85) 100%
-    ),
-    radial-gradient(
-      circle at 20% 50%,
-      rgba(255, 255, 255, 0.1) 0%,
-      transparent 50%
-    ),
-    radial-gradient(circle at 80% 50%, rgba(0, 0, 0, 0.2) 0%, transparent 50%);
-  background-size: cover;
-  background-position: center;
-  z-index: 1;
+  object-fit: cover;
+  object-position: center 42%;
+}
+
+.hero-background::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(139, 0, 0, 0.55) 0%,
+    rgba(180, 20, 20, 0.35) 45%,
+    rgba(0, 0, 0, 0.25) 100%
+  );
 }
 
 .hero-content {
   position: relative;
-  width: 100%;
-  max-width: 1440px;
-  height: 100%;
-  margin: 0 auto;
   z-index: 2;
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: inherit;
   display: flex;
   align-items: center;
-  padding: 1rem;
+  padding: 1rem 1.25rem;
 
   @media (min-width: 768px) {
-    padding: 1.5rem 2rem;
+    padding: 1.5rem 1.75rem;
   }
 
   @media (min-width: 1024px) {
-    padding: 2rem 3rem;
+    padding: 2rem 2.25rem;
   }
 }
 
 .pokedex-header {
   width: 100%;
+  min-width: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -73,9 +88,11 @@
     gap: 0.5rem;
   }
 
-  img {
+  > img {
     width: 8rem;
+    max-width: 100%;
     height: auto;
+    flex-shrink: 1;
     filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
     transition: transform 0.3s ease;
 
@@ -100,7 +117,7 @@
 .header-controls {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   margin-left: auto;
   flex-shrink: 0;
 
@@ -120,11 +137,12 @@
   flex-direction: column;
   gap: 0.35rem;
   z-index: 10001;
+  flex: 0 0 auto;
+  margin: 0;
+  transform-origin: center right;
   transition:
     transform 0.2s,
     background 0.2s;
-  margin-left: auto;
-  flex-shrink: 0;
 
   @media (max-width: 480px) {
     padding: 0.4rem;

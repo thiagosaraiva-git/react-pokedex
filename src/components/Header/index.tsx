@@ -1,4 +1,5 @@
 import '../Header/styles.scss'
+import heroBanner from '../../img/hero-banner.webp'
 import { LanguageSelector } from '../LanguageSelector'
 
 interface HeaderProps {
@@ -8,7 +9,16 @@ interface HeaderProps {
 export function Header({ onMenuClick }: HeaderProps) {
   return (
     <header className="hero-banner">
-      <div className="hero-background" />
+      <div className="hero-background" aria-hidden="true">
+        <img
+          className="hero-background-image"
+          src={heroBanner}
+          alt=""
+          width={1280}
+          height={720}
+          fetchPriority="high"
+        />
+      </div>
       <div className="hero-content">
         <div className="pokedex-header">
           <img
@@ -20,6 +30,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             {onMenuClick && (
               <button
                 className="hamburger-button"
+                type="button"
                 onClick={onMenuClick}
                 aria-label="Filtros"
                 aria-controls="filter-drawer"
