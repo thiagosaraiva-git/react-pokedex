@@ -14,11 +14,13 @@
   cursor: pointer;
   transition: all 0.2s;
   min-width: 120px;
+  max-width: 160px;
 
   @media (max-width: 480px) {
-    padding: 0.4rem 0.5rem;
-    font-size: 0.8rem;
-    min-width: 90px;
+    padding: 0.3rem 0.4rem;
+    font-size: 0.75rem;
+    min-width: 75px;
+    max-width: 80px;
     border-width: 1px;
   }
 
