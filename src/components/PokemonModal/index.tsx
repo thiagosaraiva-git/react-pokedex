@@ -2,13 +2,14 @@ import React, { useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import './styles.scss'
 import { getFormDisplayName } from '../../utils/pokemonNames'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 interface PokedexType {
-  type: { name: string }
+  type: { name: string; url?: string }
 }
 
 interface PokedexAbility {
-  ability: { name: string }
+  ability: { name: string; url?: string }
   is_hidden?: boolean
 }
 
@@ -61,6 +62,7 @@ export function PokemonModal({
   const modalRef = useRef<HTMLDivElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null)
+  const { language, getLocalizedName } = useLanguage()
 
   const [forms, setForms] = useState<PokemonForm[]>([])
   const [selectedFormIndex, setSelectedFormIndex] = useState(0)
@@ -69,6 +71,12 @@ export function PokemonModal({
   const [currentTypes, setCurrentTypes] = useState(types)
   const [currentStats, setCurrentStats] = useState(stats)
   const [animateStats, setAnimateStats] = useState(false)
+  const [localizedTypes, setLocalizedTypes] = useState<Record<string, string>>(
+    {}
+  )
+  const [localizedAbilities, setLocalizedAbilities] = useState<
+    Record<string, string>
+  >({})
 
   useEffect(() => {
     if (!isOpen) {
@@ -80,7 +88,7 @@ export function PokemonModal({
 
     closeButtonRef.current?.focus()
 
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setAnimateStats(true)
     }, 50)
 
@@ -112,6 +120,7 @@ export function PokemonModal({
     document.addEventListener('keydown', handleTabKey)
 
     return () => {
+      clearTimeout(timer)
       document.removeEventListener('keydown', handleEscape)
       document.removeEventListener('keydown', handleTabKey)
       previouslyFocusedElementRef.current?.focus()
@@ -188,6 +197,58 @@ export function PokemonModal({
     }
   }, [isOpen, id, name, sprite, types])
 
+  useEffect(() => {
+    if (!isOpen || !types) return
+
+    const fetchTypeNames = async () => {
+      const typePromises = types.map(async typeObj => {
+        const typeName = typeObj.type.name
+        try {
+          const response = await axios.get(
+            `https://pokeapi.co/api/v2/type/${typeName}`
+          )
+          const localizedName = getLocalizedName(response.data.names)
+          return { [typeName]: localizedName || typeName }
+        } catch (error) {
+          console.error(`Failed to fetch type ${typeName}:`, error)
+          return { [typeName]: typeName }
+        }
+      })
+
+      const results = await Promise.all(typePromises)
+      const typeMap = Object.assign({}, ...results)
+      setLocalizedTypes(typeMap)
+    }
+
+    fetchTypeNames()
+  }, [isOpen, types, language, getLocalizedName])
+
+  useEffect(() => {
+    if (!isOpen || !abilities) return
+
+    const fetchAbilityNames = async () => {
+      const abilityPromises = abilities.map(async abilityObj => {
+        const abilityName = abilityObj.ability.name
+        try {
+          const response = await axios.get(
+            `https://pokeapi.co/api/v2/ability/${abilityName}`
+          )
+          const localizedName = getLocalizedName(response.data.names)
+          return { [abilityName]: localizedName || abilityName }
+        } catch (error) {
+          console.error(`Failed to fetch ability ${abilityName}:`, error)
+          return { [abilityName]: abilityName }
+        }
+      })
+
+      const results = await Promise.all(abilityPromises)
+      const abilityMap = Object.assign({}, ...results)
+      setLocalizedAbilities(abilityMap)
+    }
+
+    fetchAbilityNames()
+  }, [isOpen, abilities, language, getLocalizedName])
+
   const handleFormSelect = (index: number) => {
     if (index < 0 || index >= forms.length) return
 
@@ -212,6 +273,10 @@ export function PokemonModal({
   const displayTypes = currentTypes || types
   const type1 = displayTypes?.[0]?.type?.name ?? 'N/A'
   const type2 = displayTypes?.[1]?.type?.name
+
+  const type1Localized =
+    type1 !== 'N/A' ? localizedTypes[type1] || type1 : 'N/A'
+  const type2Localized = type2 ? localizedTypes[type2] || type2 : undefined
 
   const normalAbilities = abilities?.filter(a => !a.is_hidden) ?? []
   const hiddenAbilities = abilities?.filter(a => a.is_hidden) ?? []
@@ -263,13 +328,15 @@ export function PokemonModal({
             </div>
             <div className="modal-types">
               <span className={`type-badge ${type1}`}>
-                {type1 === 'N/A'
-                  ? type1
-                  : type1.charAt(0).toUpperCase() + type1.slice(1)}
+                {type1Localized === 'N/A'
+                  ? type1Localized
+                  : type1Localized.charAt(0).toUpperCase() +
+                    type1Localized.slice(1)}
               </span>
-              {type2 && (
+              {type2Localized && (
                 <span className={`type-badge ${type2}`}>
-                  {type2.charAt(0).toUpperCase() + type2.slice(1)}
+                  {type2Localized.charAt(0).toUpperCase() +
+                    type2Localized.slice(1)}
                 </span>
               )}
             </div>
@@ -324,18 +391,24 @@ export function PokemonModal({
               <h3>Abilities</h3>
               {normalAbilities.length > 0 && (
                 <ul className="abilities-list">
-                  {normalAbilities.map((ability, index) => (
-                    <li key={index}>{ability.ability.name}</li>
-                  ))}
+                  {normalAbilities.map((ability, index) => {
+                    const abilityName = ability.ability.name
+                    const displayName =
+                      localizedAbilities[abilityName] || abilityName
+                    return <li key={index}>{displayName}</li>
+                  })}
                 </ul>
               )}
               {hiddenAbilities.length > 0 && (
                 <>
                   <h4 className="hidden-abilities-title">Hidden Abilities</h4>
                   <ul className="abilities-list hidden">
-                    {hiddenAbilities.map((ability, index) => (
-                      <li key={index}>{ability.ability.name}</li>
-                    ))}
+                    {hiddenAbilities.map((ability, index) => {
+                      const abilityName = ability.ability.name
+                      const displayName =
+                        localizedAbilities[abilityName] || abilityName
+                      return <li key={index}>{displayName}</li>
+                    })}
                   </ul>
                 </>
               )}
