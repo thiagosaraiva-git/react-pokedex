@@ -23,6 +23,10 @@
   align-items: center;
   gap: 1rem;
   margin-left: auto;
+
+  @media (max-width: 480px) {
+    gap: 0.5rem;
+  }
 }
 
 .hamburger-button {
@@ -36,6 +40,11 @@
   z-index: 10001;
   transition: transform 0.2s;
   margin-right: 0.5rem;
+
+  @media (max-width: 480px) {
+    padding: 0.5rem;
+    margin-right: 0.25rem;
+  }
 
   &:hover {
     transform: scale(1.1);

@@ -15,6 +15,13 @@
   transition: all 0.2s;
   min-width: 120px;
 
+  @media (max-width: 480px) {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.8rem;
+    min-width: 90px;
+    border-width: 1px;
+  }
+
   &:hover {
     background-color: white;
     transform: translateY(-1px);
