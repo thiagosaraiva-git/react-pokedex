@@ -99,7 +99,7 @@ describe('Pokedex Component', () => {
     vi.spyOn(apiModule.api, 'get').mockImplementation(mockGet)
 
     renderWithProvider(<Pokedex name="charizard" />)
-    expect(screen.getByLabelText('Loading')).toBeInTheDocument()
+    expect(screen.getByLabelText(/loading/i)).toBeInTheDocument()
   })
 
   it('should display clean pokemon name without form suffix', async () => {

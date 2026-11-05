@@ -6,7 +6,7 @@ import {
 } from '../../contexts/LanguageContext'
 
 export function LanguageSelector() {
-  const { language, setLanguage } = useLanguage()
+  const { language, setLanguage, t } = useLanguage()
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setLanguage(event.target.value as LanguageCode)
@@ -17,7 +17,7 @@ export function LanguageSelector() {
       <select
         value={language}
         onChange={handleChange}
-        aria-label="Select language"
+        aria-label={t('selectLanguage')}
         className="language-select"
       >
         {Object.entries(SUPPORTED_LANGUAGES).map(([code, name]) => (

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { Pokedex } from '../Pokedex'
 import { Loading } from '../Loading'
 import { api } from '../../services/api'
+import { useLanguage } from '../../contexts/LanguageContext'
 import '../Pokemon/styles.scss'
 
 interface PokemonCardList {
@@ -48,6 +49,7 @@ export function PokemonCard({
   const [displayCount, setDisplayCount] = useState(BATCH_SIZE)
 
   const observerTarget = useRef<HTMLDivElement>(null)
+  const { t } = useLanguage()
 
   const isBaseForm = (pokemonName: string): boolean => {
     const formSuffixes = [
@@ -292,14 +294,16 @@ export function PokemonCard({
   return (
     <>
       <div className="results-info">
-        Showing {displayedPokemons.length} of {getFilteredPokemons().length}{' '}
-        Pokémon
+        {t('showingResults', {
+          shown: displayedPokemons.length,
+          total: getFilteredPokemons().length,
+        })}
       </div>
       <section className="pokemon-namelist">
         {displayedPokemons.length === 0 ? (
           <div className="empty-state">
-            <p>No Pokémon found matching your filters.</p>
-            <p>Try adjusting your search or clearing filters.</p>
+            <p>{t('emptyNoMatch')}</p>
+            <p>{t('emptyTryAdjusting')}</p>
           </div>
         ) : (
           <ul>
@@ -310,9 +314,7 @@ export function PokemonCard({
         )}
       </section>
       <div ref={observerTarget} className="load-more-trigger">
-        {isLoadingMore && (
-          <Loading variant="inline" message="Carregando mais…" />
-        )}
+        {isLoadingMore && <Loading variant="inline" />}
       </div>
     </>
   )

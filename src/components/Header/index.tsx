@@ -1,11 +1,13 @@
 import '../Header/styles.scss'
 import { LanguageSelector } from '../LanguageSelector'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 interface HeaderProps {
   onMenuClick?: () => void
 }
 
 export function Header({ onMenuClick }: HeaderProps) {
+  const { t } = useLanguage()
   return (
     <header className="pokedex-header">
       <img
@@ -19,7 +21,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             className="hamburger-button"
             type="button"
             onClick={onMenuClick}
-            aria-label="Filtros"
+            aria-label={t('filters')}
             aria-controls="filter-drawer"
           >
             <span className="hamburger-line" />
