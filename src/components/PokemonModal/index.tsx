@@ -26,6 +26,7 @@ interface LocalizedApiName {
 interface PokemonForm {
   name: string
   names: LocalizedApiName[]
+  isDefault: boolean
   sprites: {
     front_default?: string
     other?: { home?: { front_default?: string } }
@@ -83,6 +84,7 @@ export function PokemonModal({
   const [localizedAbilities, setLocalizedAbilities] = useState<
     Record<string, string>
   >({})
+  const [speciesNames, setSpeciesNames] = useState<LocalizedApiName[]>([])
 
   useEffect(() => {
     if (!isOpen) {
@@ -141,6 +143,7 @@ export function PokemonModal({
     setCurrentSprite(sprite)
     setCurrentTypes(types)
     setCurrentStats(stats)
+    setSpeciesNames([])
 
     let cancelled = false
 
@@ -151,6 +154,9 @@ export function PokemonModal({
           `https://pokeapi.co/api/v2/pokemon-species/${id}`
         )
         const varieties: PokemonVariety[] = speciesResponse.data.varieties || []
+        if (!cancelled) {
+          setSpeciesNames(speciesResponse.data.names || [])
+        }
 
         if (varieties.length <= 1) {
           setForms([])
@@ -180,6 +186,7 @@ export function PokemonModal({
             return {
               name: variety.pokemon.name,
               names: formNames,
+              isDefault: variety.is_default,
               sprites: pokemonResponse.data.sprites,
               types: pokemonResponse.data.types || [],
               stats: pokemonResponse.data.stats || [],
@@ -205,6 +212,7 @@ export function PokemonModal({
         console.error('Failed to fetch Pokemon forms:', error)
         if (!cancelled) {
           setForms([])
+          setSpeciesNames([])
         }
       } finally {
         if (!cancelled) {
@@ -293,7 +301,13 @@ export function PokemonModal({
   }
 
   const getFormLabel = (form: PokemonForm): string => {
-    return getLocalizedName(form.names) || getFormDisplayName(form.name)
+    const localizedFormName = getLocalizedName(form.names)
+    if (localizedFormName) return localizedFormName
+    if (form.isDefault) {
+      const localizedSpeciesName = getLocalizedName(speciesNames)
+      if (localizedSpeciesName) return localizedSpeciesName
+    }
+    return getFormDisplayName(form.name)
   }
 
   if (!isOpen) return null

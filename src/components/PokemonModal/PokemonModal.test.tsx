@@ -681,4 +681,123 @@ describe('PokemonModal Component', () => {
       expect(screen.getByText('Charizard Mega Y')).toBeInTheDocument()
     })
   })
+
+  it('should localize the default form chip from species names', async () => {
+    const user = userEvent.setup()
+    localStorage.clear()
+
+    const speciesWithNames = {
+      ...mockSpeciesData,
+      names: [
+        { language: { name: 'en' }, name: 'Venusaur' },
+        { language: { name: 'ja' }, name: 'フシギバナ' },
+      ],
+      varieties: [
+        {
+          is_default: true,
+          pokemon: {
+            name: 'venusaur',
+            url: 'https://pokeapi.co/api/v2/pokemon/3/',
+          },
+        },
+        {
+          is_default: false,
+          pokemon: {
+            name: 'venusaur-mega',
+            url: 'https://pokeapi.co/api/v2/pokemon/10033/',
+          },
+        },
+      ],
+    }
+
+    const venusaurForm = {
+      name: 'venusaur',
+      sprites: {
+        front_default: 'https://example.com/venusaur.png',
+        other: { home: { front_default: 'https://example.com/venusaur.png' } },
+      },
+      types: [{ type: { name: 'grass' } }, { type: { name: 'poison' } }],
+      stats: mockPokemonData.stats,
+      forms: [
+        {
+          name: 'venusaur',
+          url: 'https://pokeapi.co/api/v2/pokemon-form/3/',
+        },
+      ],
+    }
+
+    const venusaurMegaForm = {
+      name: 'venusaur-mega',
+      sprites: {
+        front_default: 'https://example.com/venusaur-mega.png',
+        other: {
+          home: { front_default: 'https://example.com/venusaur-mega.png' },
+        },
+      },
+      types: [{ type: { name: 'grass' } }, { type: { name: 'poison' } }],
+      stats: mockPokemonData.stats,
+      forms: [
+        {
+          name: 'venusaur-mega',
+          url: 'https://pokeapi.co/api/v2/pokemon-form/10033/',
+        },
+      ],
+    }
+
+    const mockAxiosGet = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('pokemon-species')) {
+        return Promise.resolve({ data: speciesWithNames })
+      }
+      if (url.includes('pokemon-form/10033')) {
+        return Promise.resolve({
+          data: {
+            names: [],
+            form_names: [
+              { language: { name: 'en' }, name: 'Mega Venusaur' },
+              { language: { name: 'ja' }, name: 'メガフシギバナ' },
+            ],
+          },
+        })
+      }
+      if (url.includes('pokemon-form/')) {
+        return Promise.resolve({ data: { names: [], form_names: [] } })
+      }
+      if (url.includes('10033')) {
+        return Promise.resolve({ data: venusaurMegaForm })
+      }
+      return Promise.resolve({ data: venusaurForm })
+    })
+    ;(axios.get as any) = mockAxiosGet
+
+    renderWithProvider(
+      <LanguageHarness>
+        <PokemonModal
+          isOpen={true}
+          onClose={vi.fn()}
+          {...mockPokemonData}
+          id={3}
+          name="venusaur"
+        />
+      </LanguageHarness>
+    )
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('button', { name: /switch to venusaur$/i })
+      ).toBeInTheDocument()
+      expect(screen.getByText('Mega Venusaur')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText('to-ja'))
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('button', { name: 'フシギバナに切り替え' })
+      ).toBeInTheDocument()
+      expect(screen.getByText('メガフシギバナ')).toBeInTheDocument()
+      expect(
+        screen.queryByRole('button', { name: /switch to venusaur$/i })
+      ).not.toBeInTheDocument()
+    })
+  })
 })
