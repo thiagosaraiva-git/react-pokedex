@@ -9,12 +9,14 @@ const renderHeader = (ui: React.ReactElement) => {
 }
 
 describe('Header', () => {
-  it('should render the hero banner', () => {
-    renderHeader(<Header />)
+  it('should render the red nav chrome without the hero banner', () => {
+    const { container } = renderHeader(<Header />)
 
     const header = screen.getByRole('banner')
     expect(header).toBeInTheDocument()
-    expect(header).toHaveClass('hero-banner')
+    expect(header).toHaveClass('pokedex-header')
+    expect(header).not.toHaveClass('hero-banner')
+    expect(container.querySelector('.hero-banner')).not.toBeInTheDocument()
   })
 
   it('should render the Pokémon logo', () => {
@@ -62,20 +64,6 @@ describe('Header', () => {
     const hamburgerLines = hamburgerButton.querySelectorAll('.hamburger-line')
 
     expect(hamburgerLines).toHaveLength(3)
-  })
-
-  it('should have proper hero structure with background and content', () => {
-    const { container } = renderHeader(<Header />)
-
-    const heroBackground = container.querySelector('.hero-background')
-    const heroContent = container.querySelector('.hero-content')
-    const heroImage = container.querySelector('.hero-background-image')
-
-    expect(heroBackground).toBeInTheDocument()
-    expect(heroContent).toBeInTheDocument()
-    expect(heroImage).toBeInTheDocument()
-    expect(heroImage).toHaveAttribute('src')
-    expect(heroImage).toHaveAttribute('alt', '')
   })
 
   it('should render the language selector', () => {

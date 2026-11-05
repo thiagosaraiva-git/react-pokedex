@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { PokemonCard } from './components/Pokemon'
 import { Header } from './components/Header'
+import { Hero } from './components/Hero'
 import { FilterDrawer } from './components/FilterDrawer'
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
   return (
     <>
       <Header onMenuClick={() => setIsDrawerOpen(true)} />
+      <Hero />
       <FilterDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
