@@ -18,8 +18,15 @@ interface PokedexStat {
   stat: { name: string }
 }
 
+interface LocalizedApiName {
+  language: { name: string }
+  name: string
+}
+
 interface PokemonForm {
   name: string
+  names: LocalizedApiName[]
+  isDefault: boolean
   sprites: {
     front_default?: string
     other?: { home?: { front_default?: string } }
@@ -62,7 +69,7 @@ export function PokemonModal({
   const modalRef = useRef<HTMLDivElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null)
-  const { language, getLocalizedName } = useLanguage()
+  const { language, getLocalizedName, t } = useLanguage()
 
   const [forms, setForms] = useState<PokemonForm[]>([])
   const [selectedFormIndex, setSelectedFormIndex] = useState(0)
@@ -77,6 +84,7 @@ export function PokemonModal({
   const [localizedAbilities, setLocalizedAbilities] = useState<
     Record<string, string>
   >({})
+  const [speciesNames, setSpeciesNames] = useState<LocalizedApiName[]>([])
 
   useEffect(() => {
     if (!isOpen) {
@@ -135,6 +143,7 @@ export function PokemonModal({
     setCurrentSprite(sprite)
     setCurrentTypes(types)
     setCurrentStats(stats)
+    setSpeciesNames([])
 
     let cancelled = false
 
@@ -145,6 +154,9 @@ export function PokemonModal({
           `https://pokeapi.co/api/v2/pokemon-species/${id}`
         )
         const varieties: PokemonVariety[] = speciesResponse.data.varieties || []
+        if (!cancelled) {
+          setSpeciesNames(speciesResponse.data.names || [])
+        }
 
         if (varieties.length <= 1) {
           setForms([])
@@ -155,8 +167,26 @@ export function PokemonModal({
         const formDataPromises = varieties.map(async variety => {
           try {
             const pokemonResponse = await axios.get(variety.pokemon.url)
+            let formNames: LocalizedApiName[] = []
+            const formUrl = pokemonResponse.data.forms?.[0]?.url
+            if (formUrl) {
+              try {
+                const formResponse = await axios.get(formUrl)
+                formNames = [
+                  ...(formResponse.data.form_names || []),
+                  ...(formResponse.data.names || []),
+                ]
+              } catch (error) {
+                console.error(
+                  `Failed to fetch form names for ${variety.pokemon.name}:`,
+                  error
+                )
+              }
+            }
             return {
               name: variety.pokemon.name,
+              names: formNames,
+              isDefault: variety.is_default,
               sprites: pokemonResponse.data.sprites,
               types: pokemonResponse.data.types || [],
               stats: pokemonResponse.data.stats || [],
@@ -182,6 +212,7 @@ export function PokemonModal({
         console.error('Failed to fetch Pokemon forms:', error)
         if (!cancelled) {
           setForms([])
+          setSpeciesNames([])
         }
       } finally {
         if (!cancelled) {
@@ -198,10 +229,11 @@ export function PokemonModal({
   }, [isOpen, id, name, sprite, types])
 
   useEffect(() => {
-    if (!isOpen || !types) return
+    const typesToFetch = currentTypes || types
+    if (!isOpen || !typesToFetch) return
 
     const fetchTypeNames = async () => {
-      const typePromises = types.map(async typeObj => {
+      const typePromises = typesToFetch.map(async typeObj => {
         const typeName = typeObj.type.name
         try {
           const response = await axios.get(
@@ -217,11 +249,11 @@ export function PokemonModal({
 
       const results = await Promise.all(typePromises)
       const typeMap = Object.assign({}, ...results)
-      setLocalizedTypes(typeMap)
+      setLocalizedTypes(prev => ({ ...prev, ...typeMap }))
     }
 
     fetchTypeNames()
-  }, [isOpen, types, language, getLocalizedName])
+  }, [isOpen, currentTypes, types, language, getLocalizedName])
 
   useEffect(() => {
     if (!isOpen || !abilities) return
@@ -268,6 +300,16 @@ export function PokemonModal({
     }, 50)
   }
 
+  const getFormLabel = (form: PokemonForm): string => {
+    const localizedFormName = getLocalizedName(form.names)
+    if (localizedFormName) return localizedFormName
+    if (form.isDefault) {
+      const localizedSpeciesName = getLocalizedName(speciesNames)
+      if (localizedSpeciesName) return localizedSpeciesName
+    }
+    return getFormDisplayName(form.name)
+  }
+
   if (!isOpen) return null
 
   const displayTypes = currentTypes || types
@@ -275,7 +317,7 @@ export function PokemonModal({
   const type2 = displayTypes?.[1]?.type?.name
 
   const type1Localized =
-    type1 !== 'N/A' ? localizedTypes[type1] || type1 : 'N/A'
+    type1 !== 'N/A' ? localizedTypes[type1] || type1 : t('notAvailable')
   const type2Localized = type2 ? localizedTypes[type2] || type2 : undefined
 
   const normalAbilities = abilities?.filter(a => !a.is_hidden) ?? []
@@ -306,7 +348,7 @@ export function PokemonModal({
           ref={closeButtonRef}
           className="modal-close"
           onClick={onClose}
-          aria-label="Close modal"
+          aria-label={t('closeModal')}
         >
           ✕
         </button>
@@ -317,18 +359,18 @@ export function PokemonModal({
               {currentSprite ? (
                 <img src={currentSprite} alt={name} className="modal-image" />
               ) : (
-                <p>No Image</p>
+                <p>{t('noImage')}</p>
               )}
             </div>
             <div className="modal-header">
-              <p className="modal-id">#{id ?? 'N/A'}</p>
+              <p className="modal-id">#{id ?? t('notAvailable')}</p>
               <h2 id="modal-title" className="modal-name">
                 {name.charAt(0).toUpperCase() + name.slice(1)}
               </h2>
             </div>
             <div className="modal-types">
               <span className={`type-badge ${type1}`}>
-                {type1Localized === 'N/A'
+                {type1 === 'N/A'
                   ? type1Localized
                   : type1Localized.charAt(0).toUpperCase() +
                     type1Localized.slice(1)}
@@ -345,19 +387,18 @@ export function PokemonModal({
           <div className="modal-right">
             {forms.length > 1 && (
               <div className="modal-section forms-section">
-                <h3>Alternative Forms</h3>
+                <h3>{t('alternativeForms')}</h3>
                 {isLoadingForms ? (
-                  <p className="loading-forms">Loading forms...</p>
+                  <p className="loading-forms">{t('loadingForms')}</p>
                 ) : (
                   <>
-                    <p className="forms-description">
-                      Click on a form to view its sprite and stats
-                    </p>
+                    <p className="forms-description">{t('formsDescription')}</p>
                     <div className="forms-grid">
                       {forms.map((form, index) => {
                         const formSprite =
                           form.sprites?.other?.home?.front_default ||
                           form.sprites?.front_default
+                        const formLabel = getFormLabel(form)
                         return (
                           <button
                             key={form.name}
@@ -365,19 +406,17 @@ export function PokemonModal({
                               index === selectedFormIndex ? 'active' : ''
                             }`}
                             onClick={() => handleFormSelect(index)}
-                            aria-label={`Switch to ${getFormDisplayName(form.name)}`}
+                            aria-label={t('switchToForm', { name: formLabel })}
                             aria-pressed={index === selectedFormIndex}
                           >
                             {formSprite && (
                               <img
                                 src={formSprite}
-                                alt={form.name}
+                                alt={formLabel}
                                 className="form-sprite"
                               />
                             )}
-                            <span className="form-name">
-                              {getFormDisplayName(form.name)}
-                            </span>
+                            <span className="form-name">{formLabel}</span>
                           </button>
                         )
                       })}
@@ -388,7 +427,7 @@ export function PokemonModal({
             )}
 
             <div className="modal-section">
-              <h3>Abilities</h3>
+              <h3>{t('abilities')}</h3>
               {normalAbilities.length > 0 && (
                 <ul className="abilities-list">
                   {normalAbilities.map((ability, index) => {
@@ -401,7 +440,9 @@ export function PokemonModal({
               )}
               {hiddenAbilities.length > 0 && (
                 <>
-                  <h4 className="hidden-abilities-title">Hidden Abilities</h4>
+                  <h4 className="hidden-abilities-title">
+                    {t('hiddenAbilities')}
+                  </h4>
                   <ul className="abilities-list hidden">
                     {hiddenAbilities.map((ability, index) => {
                       const abilityName = ability.ability.name
@@ -415,11 +456,11 @@ export function PokemonModal({
             </div>
 
             <div className="modal-section">
-              <h3>Base Stats</h3>
+              <h3>{t('baseStats')}</h3>
               <div className="stats-container">
                 <li>
                   <p>
-                    HP:{' '}
+                    {t('statHp')}{' '}
                     <progress
                       value={animateStats ? hp : 0}
                       max={maxStat}
@@ -430,7 +471,7 @@ export function PokemonModal({
                 </li>
                 <li>
                   <p>
-                    Attack:{' '}
+                    {t('statAttack')}{' '}
                     <progress
                       value={animateStats ? attack : 0}
                       max={maxStat}
@@ -441,7 +482,7 @@ export function PokemonModal({
                 </li>
                 <li>
                   <p>
-                    Defense:{' '}
+                    {t('statDefense')}{' '}
                     <progress
                       value={animateStats ? defense : 0}
                       max={maxStat}
@@ -452,7 +493,7 @@ export function PokemonModal({
                 </li>
                 <li>
                   <p>
-                    Sp. Attack:{' '}
+                    {t('statSpAttack')}{' '}
                     <progress
                       value={animateStats ? special_attack : 0}
                       max={maxStat}
@@ -463,7 +504,7 @@ export function PokemonModal({
                 </li>
                 <li>
                   <p>
-                    Sp. Defense:{' '}
+                    {t('statSpDefense')}{' '}
                     <progress
                       value={animateStats ? special_defense : 0}
                       max={maxStat}
@@ -474,7 +515,7 @@ export function PokemonModal({
                 </li>
                 <li>
                   <p>
-                    Speed:{' '}
+                    {t('statSpeed')}{' '}
                     <progress
                       value={animateStats ? speed : 0}
                       max={maxStat}

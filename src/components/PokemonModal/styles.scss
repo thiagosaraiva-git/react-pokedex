@@ -1,4 +1,5 @@
 .modal-overlay {
+  text-transform: none;
   position: fixed;
   top: 0;
   left: 0;
@@ -219,6 +220,7 @@
   color: #666;
   font-size: 0.9rem;
   margin-bottom: 1rem;
+  text-transform: none;
 }
 
 .loading-forms {

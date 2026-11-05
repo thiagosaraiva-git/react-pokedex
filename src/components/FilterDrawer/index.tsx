@@ -1,5 +1,11 @@
 import { ChangeEvent, useEffect, useRef } from 'react'
 import './styles.scss'
+import { useLanguage } from '../../contexts/LanguageContext'
+import {
+  GENERATION_STRING_KEYS,
+  POKEMON_TYPES,
+  TYPE_STRING_KEYS,
+} from '../../i18n/uiStrings'
 
 interface FilterDrawerProps {
   isOpen: boolean
@@ -16,27 +22,6 @@ interface FilterDrawerProps {
   hasActiveFilters: boolean
 }
 
-const allTypes = [
-  'normal',
-  'fire',
-  'water',
-  'electric',
-  'grass',
-  'ice',
-  'fighting',
-  'poison',
-  'ground',
-  'flying',
-  'psychic',
-  'bug',
-  'rock',
-  'ghost',
-  'dragon',
-  'dark',
-  'steel',
-  'fairy',
-]
-
 export function FilterDrawer({
   isOpen,
   onClose,
@@ -52,6 +37,7 @@ export function FilterDrawer({
   hasActiveFilters,
 }: FilterDrawerProps) {
   const drawerRef = useRef<HTMLDivElement>(null)
+  const { t } = useLanguage()
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -95,11 +81,11 @@ export function FilterDrawer({
         aria-labelledby="drawer-title"
       >
         <div className="drawer-header">
-          <h2 id="drawer-title">Filtros</h2>
+          <h2 id="drawer-title">{t('filters')}</h2>
           <button
             className="drawer-close"
             onClick={onClose}
-            aria-label="Fechar filtros"
+            aria-label={t('closeFilters')}
           >
             ✕
           </button>
@@ -107,11 +93,11 @@ export function FilterDrawer({
 
         <div className="drawer-content">
           <div className="filter-group">
-            <label htmlFor="name-filter">Busca por nome</label>
+            <label htmlFor="name-filter">{t('searchByName')}</label>
             <input
               id="name-filter"
               type="text"
-              placeholder="Search by name"
+              placeholder={t('searchPlaceholder')}
               value={nameFilter}
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 onNameFilterChange(e.target.value)
@@ -120,7 +106,7 @@ export function FilterDrawer({
           </div>
 
           <div className="filter-group">
-            <label htmlFor="generation-filter">Geração</label>
+            <label htmlFor="generation-filter">{t('generation')}</label>
             <select
               id="generation-filter"
               value={generationFilter}
@@ -128,21 +114,16 @@ export function FilterDrawer({
                 onGenerationFilterChange(e.target.value)
               }
             >
-              <option value="all">National Dex (All Gen)</option>
-              <option value="gen1">Gen 1 (1-151)</option>
-              <option value="gen2">Gen 2 (152-251)</option>
-              <option value="gen3">Gen 3 (252-386)</option>
-              <option value="gen4">Gen 4 (387-493)</option>
-              <option value="gen5">Gen 5 (494-649)</option>
-              <option value="gen6">Gen 6 (650-721)</option>
-              <option value="gen7">Gen 7 (722-809)</option>
-              <option value="gen8">Gen 8 (810-905)</option>
-              <option value="gen9">Gen 9 (906-1025)</option>
+              {Object.entries(GENERATION_STRING_KEYS).map(([value, key]) => (
+                <option key={value} value={value}>
+                  {t(key)}
+                </option>
+              ))}
             </select>
           </div>
 
           <div className="filter-group">
-            <label htmlFor="type1-filter">Tipo 1</label>
+            <label htmlFor="type1-filter">{t('type1')}</label>
             <select
               id="type1-filter"
               value={typeFilter1}
@@ -150,17 +131,17 @@ export function FilterDrawer({
                 onTypeFilter1Change(e.target.value)
               }
             >
-              <option value="all">Any</option>
-              {allTypes.map(type => (
+              <option value="all">{t('anyType')}</option>
+              {POKEMON_TYPES.map(type => (
                 <option key={type} value={type}>
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                  {t(TYPE_STRING_KEYS[type])}
                 </option>
               ))}
             </select>
           </div>
 
           <div className="filter-group">
-            <label htmlFor="type2-filter">Tipo 2</label>
+            <label htmlFor="type2-filter">{t('type2')}</label>
             <select
               id="type2-filter"
               value={typeFilter2}
@@ -168,10 +149,10 @@ export function FilterDrawer({
                 onTypeFilter2Change(e.target.value)
               }
             >
-              <option value="all">Any</option>
-              {allTypes.map(type => (
+              <option value="all">{t('anyType')}</option>
+              {POKEMON_TYPES.map(type => (
                 <option key={type} value={type}>
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                  {t(TYPE_STRING_KEYS[type])}
                 </option>
               ))}
             </select>
@@ -184,9 +165,9 @@ export function FilterDrawer({
               onClose()
             }}
             disabled={!hasActiveFilters}
-            aria-label="Limpar filtro"
+            aria-label={t('clearFilter')}
           >
-            Limpar filtro
+            {t('clearFilter')}
           </button>
         </div>
       </div>

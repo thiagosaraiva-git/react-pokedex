@@ -2,13 +2,28 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { PokemonModal } from './index'
-import { LanguageProvider } from '../../contexts/LanguageContext'
+import { LanguageProvider, useLanguage } from '../../contexts/LanguageContext'
 import axios from 'axios'
 
 vi.mock('axios')
 
 const renderWithProvider = (ui: React.ReactElement) => {
   return render(<LanguageProvider>{ui}</LanguageProvider>)
+}
+
+function LanguageHarness({ children }: { children: React.ReactNode }) {
+  const { setLanguage } = useLanguage()
+  return (
+    <>
+      <button type="button" onClick={() => setLanguage('fr')}>
+        to-fr
+      </button>
+      <button type="button" onClick={() => setLanguage('ja')}>
+        to-ja
+      </button>
+      {children}
+    </>
+  )
 }
 
 const mockPokemonData = {
@@ -554,5 +569,235 @@ describe('PokemonModal Component', () => {
       name: /switch to charizard mega x/i,
     })
     expect(megaXButton).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('should localize modal section titles when language changes', async () => {
+    const user = userEvent.setup()
+    localStorage.clear()
+
+    renderWithProvider(
+      <LanguageHarness>
+        <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
+      </LanguageHarness>
+    )
+
+    expect(screen.getByText('Abilities')).toBeInTheDocument()
+    expect(screen.getByText('Hidden Abilities')).toBeInTheDocument()
+    expect(screen.getByText('Base Stats')).toBeInTheDocument()
+    expect(screen.getByLabelText('Close modal')).toBeInTheDocument()
+
+    await user.click(screen.getByText('to-fr'))
+
+    expect(screen.getByText('Talents')).toBeInTheDocument()
+    expect(screen.getByText('Talents cachés')).toBeInTheDocument()
+    expect(screen.getByText('Stats de base')).toBeInTheDocument()
+    expect(screen.getByLabelText('Fermer la fenêtre')).toBeInTheDocument()
+    expect(screen.queryByText('Abilities')).not.toBeInTheDocument()
+  })
+
+  it('should localize alternative form names from the API with English fallback', async () => {
+    const user = userEvent.setup()
+    localStorage.clear()
+
+    const mockAxiosGet = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('pokemon-species')) {
+        return Promise.resolve({ data: mockSpeciesData })
+      }
+      if (url.includes('pokemon-form/10034')) {
+        return Promise.resolve({
+          data: {
+            names: [
+              { language: { name: 'en' }, name: 'Mega Charizard X' },
+              { language: { name: 'fr' }, name: 'Méga-Dracaufeu X' },
+            ],
+            form_names: [
+              { language: { name: 'en' }, name: 'Mega Charizard X' },
+              { language: { name: 'ja' }, name: 'メガリザードンＸ' },
+              { language: { name: 'fr' }, name: 'Méga-Dracaufeu X' },
+            ],
+          },
+        })
+      }
+      if (url.includes('pokemon-form/')) {
+        return Promise.resolve({ data: { names: [], form_names: [] } })
+      }
+      if (url.includes('10034')) {
+        return Promise.resolve({
+          data: {
+            ...mockCharizardMegaXFormData,
+            forms: [
+              {
+                name: 'charizard-mega-x',
+                url: 'https://pokeapi.co/api/v2/pokemon-form/10034/',
+              },
+            ],
+          },
+        })
+      }
+      if (url.includes('10035')) {
+        return Promise.resolve({
+          data: {
+            ...mockCharizardMegaYFormData,
+            forms: [
+              {
+                name: 'charizard-mega-y',
+                url: 'https://pokeapi.co/api/v2/pokemon-form/10035/',
+              },
+            ],
+          },
+        })
+      }
+      return Promise.resolve({
+        data: {
+          ...mockCharizardFormData,
+          forms: [
+            {
+              name: 'charizard',
+              url: 'https://pokeapi.co/api/v2/pokemon-form/6/',
+            },
+          ],
+        },
+      })
+    })
+    ;(axios.get as any) = mockAxiosGet
+
+    renderWithProvider(
+      <LanguageHarness>
+        <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
+      </LanguageHarness>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Alternative Forms')).toBeInTheDocument()
+      expect(screen.getByText('Mega Charizard X')).toBeInTheDocument()
+      expect(screen.getByText('Charizard Mega Y')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText('to-ja'))
+
+    await waitFor(() => {
+      expect(screen.getByText('別の姿')).toBeInTheDocument()
+      expect(screen.getByText('メガリザードンＸ')).toBeInTheDocument()
+      expect(screen.getByText('Charizard Mega Y')).toBeInTheDocument()
+    })
+  })
+
+  it('should localize the default form chip from species names', async () => {
+    const user = userEvent.setup()
+    localStorage.clear()
+
+    const speciesWithNames = {
+      ...mockSpeciesData,
+      names: [
+        { language: { name: 'en' }, name: 'Venusaur' },
+        { language: { name: 'ja' }, name: 'フシギバナ' },
+      ],
+      varieties: [
+        {
+          is_default: true,
+          pokemon: {
+            name: 'venusaur',
+            url: 'https://pokeapi.co/api/v2/pokemon/3/',
+          },
+        },
+        {
+          is_default: false,
+          pokemon: {
+            name: 'venusaur-mega',
+            url: 'https://pokeapi.co/api/v2/pokemon/10033/',
+          },
+        },
+      ],
+    }
+
+    const venusaurForm = {
+      name: 'venusaur',
+      sprites: {
+        front_default: 'https://example.com/venusaur.png',
+        other: { home: { front_default: 'https://example.com/venusaur.png' } },
+      },
+      types: [{ type: { name: 'grass' } }, { type: { name: 'poison' } }],
+      stats: mockPokemonData.stats,
+      forms: [
+        {
+          name: 'venusaur',
+          url: 'https://pokeapi.co/api/v2/pokemon-form/3/',
+        },
+      ],
+    }
+
+    const venusaurMegaForm = {
+      name: 'venusaur-mega',
+      sprites: {
+        front_default: 'https://example.com/venusaur-mega.png',
+        other: {
+          home: { front_default: 'https://example.com/venusaur-mega.png' },
+        },
+      },
+      types: [{ type: { name: 'grass' } }, { type: { name: 'poison' } }],
+      stats: mockPokemonData.stats,
+      forms: [
+        {
+          name: 'venusaur-mega',
+          url: 'https://pokeapi.co/api/v2/pokemon-form/10033/',
+        },
+      ],
+    }
+
+    const mockAxiosGet = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('pokemon-species')) {
+        return Promise.resolve({ data: speciesWithNames })
+      }
+      if (url.includes('pokemon-form/10033')) {
+        return Promise.resolve({
+          data: {
+            names: [],
+            form_names: [
+              { language: { name: 'en' }, name: 'Mega Venusaur' },
+              { language: { name: 'ja' }, name: 'メガフシギバナ' },
+            ],
+          },
+        })
+      }
+      if (url.includes('pokemon-form/')) {
+        return Promise.resolve({ data: { names: [], form_names: [] } })
+      }
+      if (url.includes('10033')) {
+        return Promise.resolve({ data: venusaurMegaForm })
+      }
+      return Promise.resolve({ data: venusaurForm })
+    })
+    ;(axios.get as any) = mockAxiosGet
+
+    renderWithProvider(
+      <LanguageHarness>
+        <PokemonModal
+          isOpen={true}
+          onClose={vi.fn()}
+          {...mockPokemonData}
+          id={3}
+          name="venusaur"
+        />
+      </LanguageHarness>
+    )
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('button', { name: /switch to venusaur$/i })
+      ).toBeInTheDocument()
+      expect(screen.getByText('Mega Venusaur')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText('to-ja'))
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('button', { name: 'フシギバナに切り替え' })
+      ).toBeInTheDocument()
+      expect(screen.getByText('メガフシギバナ')).toBeInTheDocument()
+      expect(
+        screen.queryByRole('button', { name: /switch to venusaur$/i })
+      ).not.toBeInTheDocument()
+    })
   })
 })

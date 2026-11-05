@@ -50,7 +50,7 @@ export function Pokedex(props: { name: string }) {
   const [pokemonData, setPokemonData] = useState<PokedexEntry | null>(null)
   const [localizedName, setLocalizedName] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { language, getLocalizedName } = useLanguage()
+  const { language, getLocalizedName, t } = useLanguage()
 
   useEffect(() => {
     const getPokedex = async () => {
@@ -108,7 +108,7 @@ export function Pokedex(props: { name: string }) {
         className="pokemon-card-button"
         onClick={openModal}
         onMouseEnter={click}
-        aria-label={`View details for ${displayName}`}
+        aria-label={t('viewDetails', { name: displayName })}
       >
         <PokemonImage
           id={id}
