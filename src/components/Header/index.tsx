@@ -1,12 +1,14 @@
 import '../Header/styles.scss'
 import heroBanner from '../../img/hero-banner.webp'
 import { LanguageSelector } from '../LanguageSelector'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 interface HeaderProps {
   onMenuClick?: () => void
 }
 
 export function Header({ onMenuClick }: HeaderProps) {
+  const { t } = useLanguage()
   return (
     <header className="hero-banner">
       <div className="hero-background" aria-hidden="true">
@@ -32,7 +34,7 @@ export function Header({ onMenuClick }: HeaderProps) {
                 className="hamburger-button"
                 type="button"
                 onClick={onMenuClick}
-                aria-label="Filtros"
+                aria-label={t('filters')}
                 aria-controls="filter-drawer"
               >
                 <span className="hamburger-line" />

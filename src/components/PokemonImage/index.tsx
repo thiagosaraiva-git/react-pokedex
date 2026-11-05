@@ -14,7 +14,7 @@ interface PokemonImageProps {
 }
 
 export function PokemonImage({ id, name, sprite, types }: PokemonImageProps) {
-  const { language, getLocalizedName } = useLanguage()
+  const { language, getLocalizedName, t } = useLanguage()
   const [localizedTypes, setLocalizedTypes] = useState<Record<string, string>>(
     {}
   )
@@ -49,7 +49,7 @@ export function PokemonImage({ id, name, sprite, types }: PokemonImageProps) {
 
   const formatName = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
   const formatType = (type: string, localizedType?: string) => {
-    if (type === 'N/A') return type
+    if (type === 'N/A') return t('notAvailable')
     const displayType = localizedType || type
     return displayType.charAt(0).toUpperCase() + displayType.slice(1)
   }
@@ -59,8 +59,8 @@ export function PokemonImage({ id, name, sprite, types }: PokemonImageProps) {
 
   return (
     <li>
-      {sprite ? <img src={sprite} alt={name} /> : <p>No Image</p>}
-      <p>#{id ?? 'N/A'}</p>
+      {sprite ? <img src={sprite} alt={name} /> : <p>{t('noImage')}</p>}
+      <p>#{id ?? t('notAvailable')}</p>
       <h4>{formatName(name)}</h4>
       <p className={`type1 ${type1}`}>{formatType(type1, type1Localized)}</p>
       {type2 && (

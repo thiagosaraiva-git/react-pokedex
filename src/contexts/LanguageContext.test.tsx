@@ -119,6 +119,96 @@ describe('LanguageContext', () => {
       const localizedName = result.current.getLocalizedName([])
       expect(localizedName).toBe('')
     })
+
+    it('should match PokéAPI language codes case-insensitively', () => {
+      const { result } = renderHook(() => useLanguage(), {
+        wrapper: LanguageProvider,
+      })
+
+      act(() => {
+        result.current.setLanguage('ja-hrkt')
+      })
+
+      const names = [
+        { language: { name: 'en' }, name: 'Pikachu' },
+        { language: { name: 'ja-Hrkt' }, name: 'ピカチュウ' },
+      ]
+
+      expect(result.current.getLocalizedName(names)).toBe('ピカチュウ')
+    })
+
+    it('should map ja-roma to PokéAPI roomaji names', () => {
+      const { result } = renderHook(() => useLanguage(), {
+        wrapper: LanguageProvider,
+      })
+
+      act(() => {
+        result.current.setLanguage('ja-roma')
+      })
+
+      const names = [
+        { language: { name: 'en' }, name: 'Pikachu' },
+        { language: { name: 'roomaji' }, name: 'Pikachuu' },
+      ]
+
+      expect(result.current.getLocalizedName(names)).toBe('Pikachuu')
+    })
+
+    it('should use Spanish names for es-419 when es-419 is absent', () => {
+      const { result } = renderHook(() => useLanguage(), {
+        wrapper: LanguageProvider,
+      })
+
+      act(() => {
+        result.current.setLanguage('es-419')
+      })
+
+      const names = [
+        { language: { name: 'en' }, name: 'Pikachu' },
+        { language: { name: 'es' }, name: 'Pikachu ES' },
+      ]
+
+      expect(result.current.getLocalizedName(names)).toBe('Pikachu ES')
+    })
+  })
+
+  describe('t', () => {
+    it('should return English UI strings by default', () => {
+      const { result } = renderHook(() => useLanguage(), {
+        wrapper: LanguageProvider,
+      })
+
+      expect(result.current.t('filters')).toBe('Filters')
+      expect(result.current.t('alternativeForms')).toBe('Alternative Forms')
+    })
+
+    it('should switch UI strings when the language changes', () => {
+      const { result } = renderHook(() => useLanguage(), {
+        wrapper: LanguageProvider,
+      })
+
+      act(() => {
+        result.current.setLanguage('ja')
+      })
+
+      expect(result.current.t('filters')).toBe('フィルター')
+      expect(result.current.t('alternativeForms')).toBe('別の姿')
+      expect(result.current.t('abilities')).toBe('特性')
+    })
+
+    it('should interpolate values in translated strings', () => {
+      const { result } = renderHook(() => useLanguage(), {
+        wrapper: LanguageProvider,
+      })
+
+      act(() => {
+        result.current.setLanguage('fr')
+      })
+
+      expect(result.current.t('showingResults', { shown: 3, total: 20 })).toBe(
+        'Affichage de 3 sur 20 Pokémon'
+      )
+    })
   })
 
   describe('useLanguage hook', () => {

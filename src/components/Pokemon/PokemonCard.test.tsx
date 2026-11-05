@@ -3,6 +3,23 @@ import { render, screen, waitFor, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { PokemonCard } from './index'
 import * as apiModule from '../../services/api'
+import { LanguageProvider, useLanguage } from '../../contexts/LanguageContext'
+
+const wrap = (ui: React.ReactElement) => (
+  <LanguageProvider>{ui}</LanguageProvider>
+)
+
+function LanguageHarness({ children }: { children: React.ReactNode }) {
+  const { setLanguage } = useLanguage()
+  return (
+    <>
+      <button type="button" onClick={() => setLanguage('fr')}>
+        to-fr
+      </button>
+      {children}
+    </>
+  )
+}
 
 const mockIntersectionObserver = vi.fn()
 mockIntersectionObserver.mockReturnValue({
@@ -84,8 +101,12 @@ describe('PokemonCard Filter Logic', () => {
     typeFilter2: 'all',
   }
 
+  const renderCard = (props = defaultProps) =>
+    render(wrap(<PokemonCard {...props} />))
+
   beforeEach(() => {
     vi.clearAllMocks()
+    localStorage.clear()
 
     const mockGet = vi.fn().mockImplementation((url: string) => {
       if (url.includes('?limit=')) {
@@ -111,7 +132,7 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should load and display Pokemon initially', async () => {
-    render(<PokemonCard {...defaultProps} />)
+    renderCard()
 
     expect(screen.getByTestId('loading')).toBeInTheDocument()
 
@@ -121,13 +142,13 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should filter by name search', async () => {
-    const { rerender } = render(<PokemonCard {...defaultProps} />)
+    const { rerender } = renderCard()
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
     })
 
-    rerender(<PokemonCard {...defaultProps} nameFilter="char" />)
+    rerender(wrap(<PokemonCard {...defaultProps} nameFilter="char" />))
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-charmander')).toBeInTheDocument()
@@ -136,13 +157,13 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should filter by generation (Gen 1)', async () => {
-    const { rerender } = render(<PokemonCard {...defaultProps} />)
+    const { rerender } = renderCard()
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
     })
 
-    rerender(<PokemonCard {...defaultProps} generationFilter="gen1" />)
+    rerender(wrap(<PokemonCard {...defaultProps} generationFilter="gen1" />))
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
@@ -152,13 +173,13 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should filter by generation (Gen 2)', async () => {
-    const { rerender } = render(<PokemonCard {...defaultProps} />)
+    const { rerender } = renderCard()
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-chikorita')).toBeInTheDocument()
     })
 
-    rerender(<PokemonCard {...defaultProps} generationFilter="gen2" />)
+    rerender(wrap(<PokemonCard {...defaultProps} generationFilter="gen2" />))
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-chikorita')).toBeInTheDocument()
@@ -168,13 +189,13 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should filter by single type', async () => {
-    const { rerender } = render(<PokemonCard {...defaultProps} />)
+    const { rerender } = renderCard()
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-charmander')).toBeInTheDocument()
     })
 
-    rerender(<PokemonCard {...defaultProps} typeFilter1="fire" />)
+    rerender(wrap(<PokemonCard {...defaultProps} typeFilter1="fire" />))
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-charmander')).toBeInTheDocument()
@@ -184,14 +205,20 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should filter by dual type (both types required)', async () => {
-    const { rerender } = render(<PokemonCard {...defaultProps} />)
+    const { rerender } = renderCard()
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
     })
 
     rerender(
-      <PokemonCard {...defaultProps} typeFilter1="grass" typeFilter2="poison" />
+      wrap(
+        <PokemonCard
+          {...defaultProps}
+          typeFilter1="grass"
+          typeFilter2="poison"
+        />
+      )
     )
 
     await waitFor(() => {
@@ -202,18 +229,20 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should combine name search with generation filter', async () => {
-    const { rerender } = render(<PokemonCard {...defaultProps} />)
+    const { rerender } = renderCard()
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
     })
 
     rerender(
-      <PokemonCard
-        {...defaultProps}
-        nameFilter="turt"
-        generationFilter="gen4"
-      />
+      wrap(
+        <PokemonCard
+          {...defaultProps}
+          nameFilter="turt"
+          generationFilter="gen4"
+        />
+      )
     )
 
     await waitFor(() => {
@@ -223,14 +252,16 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should combine name search with type filter', async () => {
-    const { rerender } = render(<PokemonCard {...defaultProps} />)
+    const { rerender } = renderCard()
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
     })
 
     rerender(
-      <PokemonCard {...defaultProps} nameFilter="chi" typeFilter1="grass" />
+      wrap(
+        <PokemonCard {...defaultProps} nameFilter="chi" typeFilter1="grass" />
+      )
     )
 
     await waitFor(() => {
@@ -240,18 +271,20 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should combine generation and type filters', async () => {
-    const { rerender } = render(<PokemonCard {...defaultProps} />)
+    const { rerender } = renderCard()
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
     })
 
     rerender(
-      <PokemonCard
-        {...defaultProps}
-        generationFilter="gen1"
-        typeFilter1="grass"
-      />
+      wrap(
+        <PokemonCard
+          {...defaultProps}
+          generationFilter="gen1"
+          typeFilter1="grass"
+        />
+      )
     )
 
     await waitFor(() => {
@@ -262,21 +295,19 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should reset filters when all are set to default', async () => {
-    const { rerender } = render(
-      <PokemonCard
-        nameFilter="char"
-        generationFilter="gen1"
-        typeFilter1="fire"
-        typeFilter2="all"
-      />
-    )
+    const { rerender } = renderCard({
+      nameFilter: 'char',
+      generationFilter: 'gen1',
+      typeFilter1: 'fire',
+      typeFilter2: 'all',
+    })
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-charmander')).toBeInTheDocument()
       expect(screen.queryByTestId('pokemon-bulbasaur')).not.toBeInTheDocument()
     })
 
-    rerender(<PokemonCard {...defaultProps} />)
+    rerender(wrap(<PokemonCard {...defaultProps} />))
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
@@ -285,7 +316,7 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should display results count', async () => {
-    render(<PokemonCard {...defaultProps} />)
+    renderCard()
 
     await waitFor(() => {
       expect(screen.getByText(/Showing \d+ of \d+ Pokémon/)).toBeInTheDocument()
@@ -293,14 +324,16 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should display empty state when no results match filters', async () => {
-    const { rerender } = render(<PokemonCard {...defaultProps} />)
+    const { rerender } = renderCard()
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
     })
 
     rerender(
-      <PokemonCard {...defaultProps} typeFilter1="fire" typeFilter2="water" />
+      wrap(
+        <PokemonCard {...defaultProps} typeFilter1="fire" typeFilter2="water" />
+      )
     )
 
     await waitFor(() => {
@@ -313,15 +346,62 @@ describe('PokemonCard Filter Logic', () => {
     })
   })
 
+  it('should localize empty state and results count when language changes', async () => {
+    const user = userEvent.setup()
+    const emptyProps = {
+      ...defaultProps,
+      typeFilter1: 'fire',
+      typeFilter2: 'water',
+    }
+
+    const { rerender } = render(
+      wrap(
+        <LanguageHarness>
+          <PokemonCard {...defaultProps} />
+        </LanguageHarness>
+      )
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
+    })
+
+    rerender(
+      wrap(
+        <LanguageHarness>
+          <PokemonCard {...emptyProps} />
+        </LanguageHarness>
+      )
+    )
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('No Pokémon found matching your filters.')
+      ).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText('to-fr'))
+
+    expect(
+      screen.getByText('Aucun Pokémon ne correspond à vos filtres.')
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText('Modifiez votre recherche ou effacez les filtres.')
+    ).toBeInTheDocument()
+    expect(screen.getByText('Affichage de 0 sur 0 Pokémon')).toBeInTheDocument()
+  })
+
   it('should handle Fire + Water dual-type (no matches case)', async () => {
-    const { rerender } = render(<PokemonCard {...defaultProps} />)
+    const { rerender } = renderCard()
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-charmander')).toBeInTheDocument()
     })
 
     rerender(
-      <PokemonCard {...defaultProps} typeFilter1="fire" typeFilter2="water" />
+      wrap(
+        <PokemonCard {...defaultProps} typeFilter1="fire" typeFilter2="water" />
+      )
     )
 
     await waitFor(() => {
@@ -332,14 +412,16 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should match dual-type in any order (Water+Dark vs Dark+Water)', async () => {
-    const { rerender } = render(<PokemonCard {...defaultProps} />)
+    const { rerender } = renderCard()
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-greninja')).toBeInTheDocument()
     })
 
     rerender(
-      <PokemonCard {...defaultProps} typeFilter1="water" typeFilter2="dark" />
+      wrap(
+        <PokemonCard {...defaultProps} typeFilter1="water" typeFilter2="dark" />
+      )
     )
 
     await waitFor(() => {
@@ -347,7 +429,9 @@ describe('PokemonCard Filter Logic', () => {
     })
 
     rerender(
-      <PokemonCard {...defaultProps} typeFilter1="dark" typeFilter2="water" />
+      wrap(
+        <PokemonCard {...defaultProps} typeFilter1="dark" typeFilter2="water" />
+      )
     )
 
     await waitFor(() => {
@@ -356,19 +440,21 @@ describe('PokemonCard Filter Logic', () => {
   })
 
   it('should combine name search with generation and type filters (triple combo)', async () => {
-    const { rerender } = render(<PokemonCard {...defaultProps} />)
+    const { rerender } = renderCard()
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-bulbasaur')).toBeInTheDocument()
     })
 
     rerender(
-      <PokemonCard
-        nameFilter="bulba"
-        generationFilter="gen1"
-        typeFilter1="grass"
-        typeFilter2="all"
-      />
+      wrap(
+        <PokemonCard
+          nameFilter="bulba"
+          generationFilter="gen1"
+          typeFilter1="grass"
+          typeFilter2="all"
+        />
+      )
     )
 
     await waitFor(() => {
@@ -403,7 +489,7 @@ describe('PokemonCard Filter Logic', () => {
 
     ;(apiModule.api.get as any) = mockGet
 
-    render(<PokemonCard {...defaultProps} />)
+    renderCard()
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-pokemon1')).toBeInTheDocument()
@@ -432,7 +518,7 @@ describe('PokemonCard Filter Logic', () => {
 
     ;(apiModule.api.get as any) = mockGet
 
-    render(<PokemonCard {...defaultProps} />)
+    renderCard()
 
     await waitFor(() => {
       expect(screen.getByTestId('pokemon-charizard')).toBeInTheDocument()

@@ -14,6 +14,7 @@ vi.mock('axios', () => ({
 }))
 
 beforeEach(() => {
+  localStorage.clear()
   mockGet.mockReset()
   mockGet.mockResolvedValue({ data: { varieties: [] } })
 })

@@ -2,13 +2,28 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { PokemonModal } from './index'
-import { LanguageProvider } from '../../contexts/LanguageContext'
+import { LanguageProvider, useLanguage } from '../../contexts/LanguageContext'
 import axios from 'axios'
 
 vi.mock('axios')
 
 const renderWithProvider = (ui: React.ReactElement) => {
   return render(<LanguageProvider>{ui}</LanguageProvider>)
+}
+
+function LanguageHarness({ children }: { children: React.ReactNode }) {
+  const { setLanguage } = useLanguage()
+  return (
+    <>
+      <button type="button" onClick={() => setLanguage('fr')}>
+        to-fr
+      </button>
+      <button type="button" onClick={() => setLanguage('ja')}>
+        to-ja
+      </button>
+      {children}
+    </>
+  )
 }
 
 const mockPokemonData = {
@@ -554,5 +569,116 @@ describe('PokemonModal Component', () => {
       name: /switch to charizard mega x/i,
     })
     expect(megaXButton).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('should localize modal section titles when language changes', async () => {
+    const user = userEvent.setup()
+    localStorage.clear()
+
+    renderWithProvider(
+      <LanguageHarness>
+        <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
+      </LanguageHarness>
+    )
+
+    expect(screen.getByText('Abilities')).toBeInTheDocument()
+    expect(screen.getByText('Hidden Abilities')).toBeInTheDocument()
+    expect(screen.getByText('Base Stats')).toBeInTheDocument()
+    expect(screen.getByLabelText('Close modal')).toBeInTheDocument()
+
+    await user.click(screen.getByText('to-fr'))
+
+    expect(screen.getByText('Talents')).toBeInTheDocument()
+    expect(screen.getByText('Talents cachés')).toBeInTheDocument()
+    expect(screen.getByText('Stats de base')).toBeInTheDocument()
+    expect(screen.getByLabelText('Fermer la fenêtre')).toBeInTheDocument()
+    expect(screen.queryByText('Abilities')).not.toBeInTheDocument()
+  })
+
+  it('should localize alternative form names from the API with English fallback', async () => {
+    const user = userEvent.setup()
+    localStorage.clear()
+
+    const mockAxiosGet = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('pokemon-species')) {
+        return Promise.resolve({ data: mockSpeciesData })
+      }
+      if (url.includes('pokemon-form/10034')) {
+        return Promise.resolve({
+          data: {
+            names: [
+              { language: { name: 'en' }, name: 'Mega Charizard X' },
+              { language: { name: 'fr' }, name: 'Méga-Dracaufeu X' },
+            ],
+            form_names: [
+              { language: { name: 'en' }, name: 'Mega Charizard X' },
+              { language: { name: 'ja' }, name: 'メガリザードンＸ' },
+              { language: { name: 'fr' }, name: 'Méga-Dracaufeu X' },
+            ],
+          },
+        })
+      }
+      if (url.includes('pokemon-form/')) {
+        return Promise.resolve({ data: { names: [], form_names: [] } })
+      }
+      if (url.includes('10034')) {
+        return Promise.resolve({
+          data: {
+            ...mockCharizardMegaXFormData,
+            forms: [
+              {
+                name: 'charizard-mega-x',
+                url: 'https://pokeapi.co/api/v2/pokemon-form/10034/',
+              },
+            ],
+          },
+        })
+      }
+      if (url.includes('10035')) {
+        return Promise.resolve({
+          data: {
+            ...mockCharizardMegaYFormData,
+            forms: [
+              {
+                name: 'charizard-mega-y',
+                url: 'https://pokeapi.co/api/v2/pokemon-form/10035/',
+              },
+            ],
+          },
+        })
+      }
+      return Promise.resolve({
+        data: {
+          ...mockCharizardFormData,
+          forms: [
+            {
+              name: 'charizard',
+              url: 'https://pokeapi.co/api/v2/pokemon-form/6/',
+            },
+          ],
+        },
+      })
+    })
+    ;(axios.get as any) = mockAxiosGet
+
+    renderWithProvider(
+      <LanguageHarness>
+        <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
+      </LanguageHarness>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Alternative Forms')).toBeInTheDocument()
+      expect(screen.getByText('Mega Charizard X')).toBeInTheDocument()
+      expect(screen.getByText('Charizard Mega Y')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText('to-ja'))
+
+    await waitFor(() => {
+      expect(screen.getByText('別の姿')).toBeInTheDocument()
+      expect(screen.getByText('メガリザードンＸ')).toBeInTheDocument()
+      expect(screen.getByText('Charizard Mega Y')).toBeInTheDocument()
+    })
   })
 })
