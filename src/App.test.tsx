@@ -61,9 +61,10 @@ describe('PokemonModal', () => {
       <PokemonModal isOpen={true} onClose={mockOnClose} {...mockPokemon} />
     )
 
-    expect(screen.getByText('static')).toBeInTheDocument()
-    expect(screen.getByText('lightning-rod')).toBeInTheDocument()
-    expect(screen.getByText('Hidden Abilities')).toBeInTheDocument()
+    expect(screen.getByText('Static')).toBeInTheDocument()
+    expect(screen.getByText('Lightning Rod')).toBeInTheDocument()
+    expect(screen.getByText('Hidden')).toBeInTheDocument()
+    expect(screen.getByText('★')).toBeInTheDocument()
   })
 
   it('should display base stats', () => {
@@ -138,7 +139,7 @@ describe('PokemonModal', () => {
       abilities: [{ ability: { name: 'overgrow' }, is_hidden: false }],
     }
 
-    renderWithProvider(
+    const { container } = renderWithProvider(
       <PokemonModal
         isOpen={true}
         onClose={mockOnClose}
@@ -146,8 +147,12 @@ describe('PokemonModal', () => {
       />
     )
 
-    expect(screen.getByText('overgrow')).toBeInTheDocument()
-    expect(screen.queryByText('Hidden Abilities')).not.toBeInTheDocument()
+    expect(screen.getByText('Overgrow')).toBeInTheDocument()
+    expect(screen.queryByText('Hidden')).not.toBeInTheDocument()
+    expect(container.querySelector('.hidden-ability-badge')).toBeNull()
+    expect(container.querySelector('.abilities-list.hidden')).toBeNull()
+    expect(screen.getByText('Abilities')).toBeInTheDocument()
+    expect(screen.getByText('Base Stats')).toBeInTheDocument()
   })
 
   it('should display image with proper alt text', () => {
