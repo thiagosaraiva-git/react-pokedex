@@ -64,6 +64,39 @@ function prefersReducedMotion(): boolean {
   )
 }
 
+function StatBar({
+  label,
+  value,
+  animate,
+}: {
+  label: string
+  value: number
+  animate: boolean
+}) {
+  return (
+    <li>
+      <p>
+        {label}{' '}
+        <span
+          className={animate ? 'stat-bar is-filling' : 'stat-bar'}
+          style={
+            {
+              '--stat-progress': animate ? `${(value / maxStat) * 100}%` : '0%',
+            } as React.CSSProperties
+          }
+        >
+          <progress
+            value={animate ? value : 0}
+            max={maxStat}
+            className={animate ? 'animating' : ''}
+          />
+        </span>{' '}
+        {value}
+      </p>
+    </li>
+  )
+}
+
 export function PokemonModal({
   isOpen,
   onClose,
@@ -376,6 +409,16 @@ export function PokemonModal({
         <div className="modal-layout">
           <div className="modal-left">
             <div className="modal-sprite-section">
+              {type1 !== 'N/A' && (
+                <div
+                  className="modal-sprite-gradient"
+                  aria-hidden="true"
+                  data-types={type2 ? `${type1} ${type2}` : type1}
+                >
+                  <span className={`modal-sprite-tone ${type1}`} />
+                  {type2 && <span className={`modal-sprite-tone ${type2}`} />}
+                </div>
+              )}
               {currentSprite ? (
                 <img src={currentSprite} alt={name} className="modal-image" />
               ) : (
@@ -482,72 +525,36 @@ export function PokemonModal({
             <div className="modal-section">
               <h3>{t('baseStats')}</h3>
               <div className="stats-container">
-                <li>
-                  <p>
-                    {t('statHp')}{' '}
-                    <progress
-                      value={animateStats ? hp : 0}
-                      max={maxStat}
-                      className={animateStats ? 'animating' : ''}
-                    />{' '}
-                    {hp}
-                  </p>
-                </li>
-                <li>
-                  <p>
-                    {t('statAttack')}{' '}
-                    <progress
-                      value={animateStats ? attack : 0}
-                      max={maxStat}
-                      className={animateStats ? 'animating' : ''}
-                    />{' '}
-                    {attack}
-                  </p>
-                </li>
-                <li>
-                  <p>
-                    {t('statDefense')}{' '}
-                    <progress
-                      value={animateStats ? defense : 0}
-                      max={maxStat}
-                      className={animateStats ? 'animating' : ''}
-                    />{' '}
-                    {defense}
-                  </p>
-                </li>
-                <li>
-                  <p>
-                    {t('statSpAttack')}{' '}
-                    <progress
-                      value={animateStats ? special_attack : 0}
-                      max={maxStat}
-                      className={animateStats ? 'animating' : ''}
-                    />{' '}
-                    {special_attack}
-                  </p>
-                </li>
-                <li>
-                  <p>
-                    {t('statSpDefense')}{' '}
-                    <progress
-                      value={animateStats ? special_defense : 0}
-                      max={maxStat}
-                      className={animateStats ? 'animating' : ''}
-                    />{' '}
-                    {special_defense}
-                  </p>
-                </li>
-                <li>
-                  <p>
-                    {t('statSpeed')}{' '}
-                    <progress
-                      value={animateStats ? speed : 0}
-                      max={maxStat}
-                      className={animateStats ? 'animating' : ''}
-                    />{' '}
-                    {speed}
-                  </p>
-                </li>
+                <StatBar
+                  label={t('statHp')}
+                  value={hp}
+                  animate={animateStats}
+                />
+                <StatBar
+                  label={t('statAttack')}
+                  value={attack}
+                  animate={animateStats}
+                />
+                <StatBar
+                  label={t('statDefense')}
+                  value={defense}
+                  animate={animateStats}
+                />
+                <StatBar
+                  label={t('statSpAttack')}
+                  value={special_attack}
+                  animate={animateStats}
+                />
+                <StatBar
+                  label={t('statSpDefense')}
+                  value={special_defense}
+                  animate={animateStats}
+                />
+                <StatBar
+                  label={t('statSpeed')}
+                  value={speed}
+                  animate={animateStats}
+                />
               </div>
             </div>
           </div>

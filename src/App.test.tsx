@@ -131,6 +131,11 @@ describe('PokemonModal', () => {
 
     expect(screen.getByText('Water')).toBeInTheDocument()
     expect(screen.getByText('Flying')).toBeInTheDocument()
+
+    const gradient = document.querySelector('.modal-sprite-gradient')
+    expect(gradient).toHaveAttribute('data-types', 'water flying')
+    expect(gradient?.querySelector('.water')).toBeInTheDocument()
+    expect(gradient?.querySelector('.flying')).toBeInTheDocument()
   })
 
   it('should handle Pokemon with no hidden abilities', () => {
@@ -163,6 +168,17 @@ describe('PokemonModal', () => {
     const image = screen.getByAltText('pikachu')
     expect(image).toBeInTheDocument()
     expect(image).toHaveAttribute('src', mockPokemon.sprite)
+  })
+
+  it('should paint the sprite area with the pokemon type color', () => {
+    renderWithProvider(
+      <PokemonModal isOpen={true} onClose={mockOnClose} {...mockPokemon} />
+    )
+
+    const gradient = document.querySelector('.modal-sprite-gradient')
+    expect(gradient).toHaveAttribute('data-types', 'electric')
+    expect(gradient?.querySelector('.electric')).toBeInTheDocument()
+    expect(gradient?.querySelectorAll('.modal-sprite-tone')).toHaveLength(1)
   })
 
   it('should not propagate click from modal content to overlay', () => {
