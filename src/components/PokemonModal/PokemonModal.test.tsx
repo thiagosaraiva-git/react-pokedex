@@ -894,61 +894,33 @@ describe('PokemonModal Component', () => {
     vi.useRealTimers()
   })
 
-  it('should show final stat values immediately when prefers-reduced-motion is set', () => {
+  it('should animate stat bars from 0 to base_stat even when prefers-reduced-motion is set', () => {
     mockPrefersReducedMotion(true)
+    vi.useFakeTimers()
 
     renderWithProvider(
       <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
     )
 
     const bars = screen.getAllByRole('progressbar')
+    expect(bars[0]).toHaveAttribute('value', '0')
+    expect(bars[0]).not.toHaveClass('animating')
+    expect(bars[0].parentElement).not.toHaveClass('is-filling')
+    expect(bars[0].parentElement).toHaveStyle({ '--stat-progress': '0%' })
+
+    act(() => {
+      vi.advanceTimersByTime(50)
+    })
+
     expect(bars[0]).toHaveAttribute('value', '78')
-    expect(bars[1]).toHaveAttribute('value', '84')
-    expect(bars[5]).toHaveAttribute('value', '100')
     expect(bars[0]).toHaveClass('animating')
     expect(bars[0].parentElement).toHaveClass('is-filling')
     expect(bars[0].parentElement).toHaveStyle({
       '--stat-progress': `${(78 / 255) * 100}%`,
     })
-  })
+    expect(bars[1]).toHaveAttribute('value', '84')
 
-  it('should keep final stat values when switching forms with reduced motion', async () => {
-    mockPrefersReducedMotion(true)
-
-    const mockAxiosGet = vi.fn().mockImplementation((url: string) => {
-      if (url.includes('pokemon-species')) {
-        return Promise.resolve({ data: mockSpeciesData })
-      }
-      if (url.includes('10034')) {
-        return Promise.resolve({ data: mockCharizardMegaXFormData })
-      }
-      if (url.includes('10035')) {
-        return Promise.resolve({ data: mockCharizardMegaYFormData })
-      }
-      return Promise.resolve({ data: mockCharizardFormData })
-    })
-    ;(axios.get as any) = mockAxiosGet
-
-    renderWithProvider(
-      <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
-    )
-
-    await waitFor(() => {
-      expect(screen.getByText('Charizard Mega X')).toBeInTheDocument()
-    })
-
-    const megaXButton = screen.getByRole('button', {
-      name: /switch to charizard mega x/i,
-    })
-    await userEvent.click(megaXButton)
-
-    const bars = screen.getAllByRole('progressbar')
-    expect(bars[1]).toHaveAttribute('value', '130')
-    expect(bars[1]).toHaveClass('animating')
-    expect(bars[1].parentElement).toHaveClass('is-filling')
-    expect(bars[1].parentElement).toHaveStyle({
-      '--stat-progress': `${(130 / 255) * 100}%`,
-    })
+    vi.useRealTimers()
   })
 
   it('should replay the stat bar fill animation when switching forms', async () => {
@@ -1001,41 +973,9 @@ describe('PokemonModal Component', () => {
     })
   })
 
-  it('should paint a dual-type gradient behind the sprite using type color classes', () => {
-    renderWithProvider(
-      <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
-    )
+  it('should replay the stat bar fill animation on form change even with reduced motion', async () => {
+    mockPrefersReducedMotion(true)
 
-    const spriteSection = document.querySelector('.modal-sprite-section')
-    const gradient = spriteSection?.querySelector('.modal-sprite-gradient')
-    expect(gradient).toBeInTheDocument()
-    expect(gradient).toHaveAttribute('data-types', 'fire flying')
-    expect(gradient?.querySelectorAll('.modal-sprite-tone')).toHaveLength(2)
-    expect(gradient?.querySelector('.fire')).toBeInTheDocument()
-    expect(gradient?.querySelector('.flying')).toBeInTheDocument()
-    expect(
-      document.querySelector('.modal-content > .modal-sprite-gradient')
-    ).not.toBeInTheDocument()
-  })
-
-  it('should paint a single-type gradient behind the sprite', () => {
-    const singleTypePokemon = {
-      ...mockPokemonData,
-      types: [{ type: { name: 'electric' } }],
-    }
-
-    renderWithProvider(
-      <PokemonModal isOpen={true} onClose={vi.fn()} {...singleTypePokemon} />
-    )
-
-    const gradient = document.querySelector('.modal-sprite-gradient')
-    expect(gradient).toHaveAttribute('data-types', 'electric')
-    expect(gradient?.querySelectorAll('.modal-sprite-tone')).toHaveLength(1)
-    expect(gradient?.querySelector('.electric')).toBeInTheDocument()
-    expect(gradient?.querySelector('.flying')).not.toBeInTheDocument()
-  })
-
-  it('should update the sprite gradient types when switching forms', async () => {
     const mockAxiosGet = vi.fn().mockImplementation((url: string) => {
       if (url.includes('pokemon-species')) {
         return Promise.resolve({ data: mockSpeciesData })
@@ -1058,20 +998,41 @@ describe('PokemonModal Component', () => {
       expect(screen.getByText('Charizard Mega X')).toBeInTheDocument()
     })
 
-    expect(document.querySelector('.modal-sprite-gradient')).toHaveAttribute(
-      'data-types',
-      'fire flying'
-    )
+    await waitFor(() => {
+      expect(screen.getAllByRole('progressbar')[1]).toHaveAttribute(
+        'value',
+        '84'
+      )
+    })
 
     await userEvent.click(
       screen.getByRole('button', { name: /switch to charizard mega x/i })
     )
 
+    const resetBars = screen.getAllByRole('progressbar')
+    expect(resetBars[1]).toHaveAttribute('value', '0')
+    expect(resetBars[1]).not.toHaveClass('animating')
+
     await waitFor(() => {
-      const gradient = document.querySelector('.modal-sprite-gradient')
-      expect(gradient).toHaveAttribute('data-types', 'fire dragon')
-      expect(gradient?.querySelector('.dragon')).toBeInTheDocument()
-      expect(gradient?.querySelector('.flying')).not.toBeInTheDocument()
+      expect(screen.getAllByRole('progressbar')[1]).toHaveAttribute(
+        'value',
+        '130'
+      )
+      expect(screen.getAllByRole('progressbar')[1]).toHaveClass('animating')
     })
+  })
+
+  it('should not paint a type-color gradient behind the sprite', () => {
+    renderWithProvider(
+      <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
+    )
+
+    const spriteSection = document.querySelector('.modal-sprite-section')
+    expect(spriteSection).toBeInTheDocument()
+    expect(
+      spriteSection?.querySelector('.modal-sprite-gradient')
+    ).not.toBeInTheDocument()
+    expect(document.querySelector('.modal-sprite-gradient')).toBeNull()
+    expect(document.querySelector('.modal-sprite-tone')).toBeNull()
   })
 })
