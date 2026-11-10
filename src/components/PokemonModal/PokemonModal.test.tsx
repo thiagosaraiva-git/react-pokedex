@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor, cleanup } from '@testing-library/react'
+import { render, screen, waitFor, cleanup, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { PokemonModal } from './index'
 import { LanguageProvider, useLanguage } from '../../contexts/LanguageContext'
@@ -9,6 +9,23 @@ vi.mock('axios')
 
 const renderWithProvider = (ui: React.ReactElement) => {
   return render(<LanguageProvider>{ui}</LanguageProvider>)
+}
+
+function mockPrefersReducedMotion(matches: boolean) {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    configurable: true,
+    value: vi.fn().mockImplementation((query: string) => ({
+      matches: matches && query.includes('prefers-reduced-motion'),
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  })
 }
 
 function LanguageHarness({ children }: { children: React.ReactNode }) {
@@ -131,6 +148,7 @@ const mockCharizardMegaYFormData = {
 describe('PokemonModal Component', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockPrefersReducedMotion(false)
     ;(axios.get as any) = vi.fn().mockImplementation((url: string) => {
       if (url.includes('/type/')) {
         return Promise.resolve({
@@ -164,6 +182,7 @@ describe('PokemonModal Component', () => {
   })
 
   afterEach(async () => {
+    vi.useRealTimers()
     cleanup()
     await new Promise(resolve => setTimeout(resolve, 0))
   })
@@ -193,9 +212,43 @@ describe('PokemonModal Component', () => {
       <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
     )
 
-    expect(screen.getByText('blaze')).toBeInTheDocument()
-    expect(screen.getByText('solar-power')).toBeInTheDocument()
-    expect(screen.getByText('Hidden Abilities')).toBeInTheDocument()
+    expect(screen.getByText('Blaze')).toBeInTheDocument()
+    expect(screen.getByText('Solar Power')).toBeInTheDocument()
+    expect(screen.getByText('Hidden')).toBeInTheDocument()
+  })
+
+  it('should render hidden abilities with a star badge and Hidden heading', () => {
+    const { container } = renderWithProvider(
+      <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
+    )
+
+    const hiddenList = container.querySelector('.abilities-list.hidden')
+    const badge = container.querySelector('.hidden-ability-badge')
+    const commonList = container.querySelector('.abilities-list:not(.hidden)')
+
+    expect(screen.getByText('Hidden')).toBeInTheDocument()
+    expect(hiddenList).toBeInTheDocument()
+    expect(badge).toBeInTheDocument()
+    expect(badge).toHaveTextContent('★')
+    expect(commonList?.textContent).toContain('Blaze')
+    expect(commonList?.querySelector('.hidden-ability-badge')).toBeNull()
+  })
+
+  it('should omit the hidden ability block when the Pokemon has none', () => {
+    const noHidden = {
+      ...mockPokemonData,
+      abilities: [{ ability: { name: 'blaze' }, is_hidden: false }],
+    }
+    const { container } = renderWithProvider(
+      <PokemonModal isOpen={true} onClose={vi.fn()} {...noHidden} />
+    )
+
+    expect(screen.getByText('Blaze')).toBeInTheDocument()
+    expect(screen.queryByText('Hidden')).not.toBeInTheDocument()
+    expect(container.querySelector('.abilities-list.hidden')).toBeNull()
+    expect(container.querySelector('.hidden-ability-badge')).toBeNull()
+    expect(screen.getByText('Abilities')).toBeInTheDocument()
+    expect(screen.getByText('Base Stats')).toBeInTheDocument()
   })
 
   it('should display stats with correct values', async () => {
@@ -582,17 +635,24 @@ describe('PokemonModal Component', () => {
     )
 
     expect(screen.getByText('Abilities')).toBeInTheDocument()
-    expect(screen.getByText('Hidden Abilities')).toBeInTheDocument()
+    expect(screen.getByText('Hidden')).toBeInTheDocument()
     expect(screen.getByText('Base Stats')).toBeInTheDocument()
     expect(screen.getByLabelText('Close modal')).toBeInTheDocument()
 
     await user.click(screen.getByText('to-fr'))
 
     expect(screen.getByText('Talents')).toBeInTheDocument()
-    expect(screen.getByText('Talents cachés')).toBeInTheDocument()
+    expect(screen.getByText('Caché')).toBeInTheDocument()
     expect(screen.getByText('Stats de base')).toBeInTheDocument()
     expect(screen.getByLabelText('Fermer la fenêtre')).toBeInTheDocument()
     expect(screen.queryByText('Abilities')).not.toBeInTheDocument()
+    expect(screen.queryByText('Hidden')).not.toBeInTheDocument()
+
+    await user.click(screen.getByText('to-ja'))
+
+    expect(screen.getByText('特性')).toBeInTheDocument()
+    expect(screen.getByText('隠れ')).toBeInTheDocument()
+    expect(screen.queryByText('Caché')).not.toBeInTheDocument()
   })
 
   it('should localize alternative form names from the API with English fallback', async () => {
@@ -799,5 +859,77 @@ describe('PokemonModal Component', () => {
         screen.queryByRole('button', { name: /switch to venusaur$/i })
       ).not.toBeInTheDocument()
     })
+  })
+
+  it('should animate stat bars from 0 to base_stat when the modal opens', () => {
+    mockPrefersReducedMotion(false)
+    vi.useFakeTimers()
+
+    renderWithProvider(
+      <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
+    )
+
+    const bars = screen.getAllByRole('progressbar')
+    expect(bars[0]).toHaveAttribute('value', '0')
+    expect(bars[0]).not.toHaveClass('animating')
+
+    act(() => {
+      vi.advanceTimersByTime(50)
+    })
+
+    expect(bars[0]).toHaveAttribute('value', '78')
+    expect(bars[0]).toHaveClass('animating')
+    expect(bars[1]).toHaveAttribute('value', '84')
+
+    vi.useRealTimers()
+  })
+
+  it('should show final stat values immediately when prefers-reduced-motion is set', () => {
+    mockPrefersReducedMotion(true)
+
+    renderWithProvider(
+      <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
+    )
+
+    const bars = screen.getAllByRole('progressbar')
+    expect(bars[0]).toHaveAttribute('value', '78')
+    expect(bars[1]).toHaveAttribute('value', '84')
+    expect(bars[5]).toHaveAttribute('value', '100')
+    expect(bars[0]).toHaveClass('animating')
+  })
+
+  it('should keep final stat values when switching forms with reduced motion', async () => {
+    mockPrefersReducedMotion(true)
+
+    const mockAxiosGet = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('pokemon-species')) {
+        return Promise.resolve({ data: mockSpeciesData })
+      }
+      if (url.includes('10034')) {
+        return Promise.resolve({ data: mockCharizardMegaXFormData })
+      }
+      if (url.includes('10035')) {
+        return Promise.resolve({ data: mockCharizardMegaYFormData })
+      }
+      return Promise.resolve({ data: mockCharizardFormData })
+    })
+    ;(axios.get as any) = mockAxiosGet
+
+    renderWithProvider(
+      <PokemonModal isOpen={true} onClose={vi.fn()} {...mockPokemonData} />
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Charizard Mega X')).toBeInTheDocument()
+    })
+
+    const megaXButton = screen.getByRole('button', {
+      name: /switch to charizard mega x/i,
+    })
+    await userEvent.click(megaXButton)
+
+    const bars = screen.getAllByRole('progressbar')
+    expect(bars[1]).toHaveAttribute('value', '130')
+    expect(bars[1]).toHaveClass('animating')
   })
 })

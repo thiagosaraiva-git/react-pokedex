@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { getCleanPokemonName, getFormDisplayName } from './pokemonNames'
+import {
+  getCleanPokemonName,
+  getFormDisplayName,
+  toTitleCase,
+} from './pokemonNames'
 
 describe('getCleanPokemonName', () => {
   it('should return the base name for pokemon without form suffixes', () => {
@@ -174,6 +178,24 @@ describe('getCleanPokemonName', () => {
     expect(getCleanPokemonName('maushold-family-of-three')).toBe('maushold')
     expect(getCleanPokemonName('zygarde-10-percent')).toBe('zygarde')
     expect(getCleanPokemonName('calyrex-ice-rider')).toBe('calyrex')
+  })
+})
+
+describe('toTitleCase', () => {
+  it('should title-case hyphenated ability names', () => {
+    expect(toTitleCase('blaze')).toBe('Blaze')
+    expect(toTitleCase('solar-power')).toBe('Solar Power')
+    expect(toTitleCase('lightning-rod')).toBe('Lightning Rod')
+  })
+
+  it('should keep already spaced names in Title Case', () => {
+    expect(toTitleCase('Lightning Rod')).toBe('Lightning Rod')
+    expect(toTitleCase('Solar Power')).toBe('Solar Power')
+  })
+
+  it('should leave non-latin names unchanged besides the first character', () => {
+    expect(toTitleCase('もうか')).toBe('もうか')
+    expect(toTitleCase('정전기')).toBe('정전기')
   })
 })
 

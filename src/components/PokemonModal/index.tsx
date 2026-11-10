@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import './styles.scss'
-import { getFormDisplayName } from '../../utils/pokemonNames'
+import { getFormDisplayName, toTitleCase } from '../../utils/pokemonNames'
 import { useLanguage } from '../../contexts/LanguageContext'
 
 interface PokedexType {
@@ -56,6 +56,14 @@ interface PokemonModalProps {
 
 const maxStat = 255
 
+function prefersReducedMotion(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  )
+}
+
 export function PokemonModal({
   isOpen,
   onClose,
@@ -77,7 +85,7 @@ export function PokemonModal({
   const [currentSprite, setCurrentSprite] = useState(sprite)
   const [currentTypes, setCurrentTypes] = useState(types)
   const [currentStats, setCurrentStats] = useState(stats)
-  const [animateStats, setAnimateStats] = useState(false)
+  const [animateStats, setAnimateStats] = useState(prefersReducedMotion)
   const [localizedTypes, setLocalizedTypes] = useState<Record<string, string>>(
     {}
   )
@@ -96,9 +104,14 @@ export function PokemonModal({
 
     closeButtonRef.current?.focus()
 
-    const timer = setTimeout(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined
+    if (prefersReducedMotion()) {
       setAnimateStats(true)
-    }, 50)
+    } else {
+      timer = setTimeout(() => {
+        setAnimateStats(true)
+      }, 50)
+    }
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -128,7 +141,7 @@ export function PokemonModal({
     document.addEventListener('keydown', handleTabKey)
 
     return () => {
-      clearTimeout(timer)
+      if (timer) clearTimeout(timer)
       document.removeEventListener('keydown', handleEscape)
       document.removeEventListener('keydown', handleTabKey)
       previouslyFocusedElementRef.current?.focus()
@@ -294,10 +307,14 @@ export function PokemonModal({
     setCurrentTypes(selectedForm.types || types)
     setCurrentStats(selectedForm.stats || stats)
 
-    setAnimateStats(false)
-    setTimeout(() => {
+    if (prefersReducedMotion()) {
       setAnimateStats(true)
-    }, 50)
+    } else {
+      setAnimateStats(false)
+      setTimeout(() => {
+        setAnimateStats(true)
+      }, 50)
+    }
   }
 
   const getFormLabel = (form: PokemonForm): string => {
@@ -322,6 +339,9 @@ export function PokemonModal({
 
   const normalAbilities = abilities?.filter(a => !a.is_hidden) ?? []
   const hiddenAbilities = abilities?.filter(a => a.is_hidden) ?? []
+
+  const formatAbilityName = (abilityName: string) =>
+    toTitleCase(localizedAbilities[abilityName] || abilityName)
 
   const displayStats = currentStats || stats
   const hp = displayStats?.[0]?.base_stat ?? 0
@@ -432,23 +452,27 @@ export function PokemonModal({
                 <ul className="abilities-list">
                   {normalAbilities.map((ability, index) => {
                     const abilityName = ability.ability.name
-                    const displayName =
-                      localizedAbilities[abilityName] || abilityName
-                    return <li key={index}>{displayName}</li>
+                    return <li key={index}>{formatAbilityName(abilityName)}</li>
                   })}
                 </ul>
               )}
               {hiddenAbilities.length > 0 && (
                 <>
-                  <h4 className="hidden-abilities-title">
-                    {t('hiddenAbilities')}
-                  </h4>
+                  <h4 className="hidden-abilities-title">{t('hidden')}</h4>
                   <ul className="abilities-list hidden">
                     {hiddenAbilities.map((ability, index) => {
                       const abilityName = ability.ability.name
-                      const displayName =
-                        localizedAbilities[abilityName] || abilityName
-                      return <li key={index}>{displayName}</li>
+                      return (
+                        <li key={index}>
+                          <span
+                            className="hidden-ability-badge"
+                            aria-hidden="true"
+                          >
+                            ★
+                          </span>
+                          {formatAbilityName(abilityName)}
+                        </li>
+                      )
                     })}
                   </ul>
                 </>

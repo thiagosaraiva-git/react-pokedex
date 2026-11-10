@@ -356,24 +356,51 @@
 
   li {
     padding: 0.5rem 1rem;
-    background-color: #f8f8f8;
+    background-color: #f1f5f9;
     border-radius: 0.5rem;
-    text-transform: capitalize;
-    color: #333;
+    color: #334155;
     min-width: 0;
     overflow-wrap: break-word;
     word-wrap: break-word;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    filter: none;
+    text-shadow: none;
   }
 
   &.hidden li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     background-color: #fff3cd;
-    border-left: 3px solid #ffc107;
+    color: #7c4a03;
+    font-weight: 600;
+    font-style: italic;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    filter: none;
+    text-shadow: none;
   }
+}
+
+.hidden-ability-badge {
+  color: #d97706;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 0.9rem;
+  line-height: 1;
+  flex-shrink: 0;
+  filter: none;
+  text-shadow: none;
 }
 
 .hidden-abilities-title {
   font-style: italic;
-  color: #856404;
+  font-weight: 600;
+  color: #b45309;
+  letter-spacing: 0.01em;
 }
 
 .stats-container {
@@ -397,7 +424,7 @@
         height: 1.5rem;
         background-color: #f0f0f0;
         border-radius: 0.5rem;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) inset;
+        box-shadow: none;
         border: none;
         appearance: none;
         min-width: 0;
@@ -405,6 +432,7 @@
         &::-webkit-progress-bar {
           background-color: #f0f0f0;
           border-radius: 0.5rem;
+          box-shadow: none;
         }
 
         &::-webkit-progress-value {
@@ -425,6 +453,20 @@
           transition: width 0.8s ease-out;
         }
       }
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stats-container li p progress {
+    &.animating::-webkit-progress-value,
+    &::-webkit-progress-value {
+      transition: none;
+    }
+
+    &.animating::-moz-progress-bar,
+    &::-moz-progress-bar {
+      transition: none;
     }
   }
 }

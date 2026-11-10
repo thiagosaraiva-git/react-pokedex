@@ -23,6 +23,7 @@ const REQUIRED_KEYS: UiStringKey[] = [
   'alternativeForms',
   'abilities',
   'hiddenAbilities',
+  'hidden',
   'baseStats',
   'emptyNoMatch',
   'loading',
@@ -49,6 +50,23 @@ describe('uiStrings', () => {
         expect(dictionary[key].length).toBeGreaterThan(0)
       })
     })
+  })
+
+  it('should translate the Hidden heading in every supported language', () => {
+    expect(getUiString('en', 'hidden')).toBe('Hidden')
+    expect(getUiString('ja', 'hidden')).toBe('隠れ')
+    expect(getUiString('ja-hrkt', 'hidden')).toBe('かくれ')
+    expect(getUiString('ja-roma', 'hidden')).toBe('Kakure')
+    expect(getUiString('ko', 'hidden')).toBe('숨겨진')
+    expect(getUiString('zh-hans', 'hidden')).toBe('隐藏')
+    expect(getUiString('zh-hant', 'hidden')).toBe('隱藏')
+    expect(getUiString('fr', 'hidden')).toBe('Caché')
+    expect(getUiString('de', 'hidden')).toBe('Versteckt')
+    expect(getUiString('es', 'hidden')).toBe('Oculta')
+    expect(getUiString('es-419', 'hidden')).toBe('Oculta')
+    expect(getUiString('it', 'hidden')).toBe('Nascosta')
+    expect(getUiString('cs', 'hidden')).toBe('Skryté')
+    expect(getUiString('pt-br', 'hidden')).toBe('Oculta')
   })
 
   it('should interpolate parameters in UI strings', () => {

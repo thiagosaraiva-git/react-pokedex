@@ -125,10 +125,14 @@ export function getCleanPokemonName(name: string): string {
   return cleanName
 }
 
-export function getFormDisplayName(formName: string): string {
-  const cleaned = formName.replace(/-/g, ' ')
-  return cleaned
+export function toTitleCase(value: string): string {
+  return value
+    .replace(/-/g, ' ')
     .split(' ')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ')
+}
+
+export function getFormDisplayName(formName: string): string {
+  return toTitleCase(formName)
 }
