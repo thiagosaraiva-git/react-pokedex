@@ -122,31 +122,6 @@
   min-height: 16rem;
   height: 16rem;
   width: 100%;
-  position: relative;
-}
-
-.modal-sprite-gradient {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  border-radius: 1.5rem;
-  overflow: hidden;
-}
-
-.modal-sprite-tone {
-  position: absolute;
-  inset: 0;
-}
-
-.modal-sprite-tone + .modal-sprite-tone {
-  -webkit-mask-image: linear-gradient(135deg, transparent 10%, #000 90%);
-  mask-image: linear-gradient(135deg, transparent 10%, #000 90%);
-}
-
-.modal-sprite-section > :not(.modal-sprite-gradient) {
-  position: relative;
-  z-index: 1;
 }
 
 .modal-right {
@@ -161,8 +136,6 @@
   width: 16rem;
   height: 16rem;
   object-fit: contain;
-  position: relative;
-  z-index: 1;
 }
 
 .modal-header {
@@ -519,29 +492,6 @@
   }
   to {
     transform: scaleX(1);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .stats-container li p {
-    .stat-bar::after,
-    .stat-bar.is-filling::after {
-      transition: none;
-      animation: none;
-      transform: none;
-    }
-
-    progress {
-      &.animating::-webkit-progress-value,
-      &::-webkit-progress-value {
-        transition: none;
-      }
-
-      &.animating::-moz-progress-bar,
-      &::-moz-progress-bar {
-        transition: none;
-      }
-    }
   }
 }
 

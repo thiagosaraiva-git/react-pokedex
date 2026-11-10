@@ -56,14 +56,6 @@ interface PokemonModalProps {
 
 const maxStat = 255
 
-function prefersReducedMotion(): boolean {
-  return (
-    typeof window !== 'undefined' &&
-    typeof window.matchMedia === 'function' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  )
-}
-
 function StatBar({
   label,
   value,
@@ -118,7 +110,7 @@ export function PokemonModal({
   const [currentSprite, setCurrentSprite] = useState(sprite)
   const [currentTypes, setCurrentTypes] = useState(types)
   const [currentStats, setCurrentStats] = useState(stats)
-  const [animateStats, setAnimateStats] = useState(prefersReducedMotion)
+  const [animateStats, setAnimateStats] = useState(false)
   const [localizedTypes, setLocalizedTypes] = useState<Record<string, string>>(
     {}
   )
@@ -137,14 +129,9 @@ export function PokemonModal({
 
     closeButtonRef.current?.focus()
 
-    let timer: ReturnType<typeof setTimeout> | undefined
-    if (prefersReducedMotion()) {
+    const timer = setTimeout(() => {
       setAnimateStats(true)
-    } else {
-      timer = setTimeout(() => {
-        setAnimateStats(true)
-      }, 50)
-    }
+    }, 50)
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -174,7 +161,7 @@ export function PokemonModal({
     document.addEventListener('keydown', handleTabKey)
 
     return () => {
-      if (timer) clearTimeout(timer)
+      clearTimeout(timer)
       document.removeEventListener('keydown', handleEscape)
       document.removeEventListener('keydown', handleTabKey)
       previouslyFocusedElementRef.current?.focus()
@@ -340,14 +327,10 @@ export function PokemonModal({
     setCurrentTypes(selectedForm.types || types)
     setCurrentStats(selectedForm.stats || stats)
 
-    if (prefersReducedMotion()) {
+    setAnimateStats(false)
+    setTimeout(() => {
       setAnimateStats(true)
-    } else {
-      setAnimateStats(false)
-      setTimeout(() => {
-        setAnimateStats(true)
-      }, 50)
-    }
+    }, 50)
   }
 
   const getFormLabel = (form: PokemonForm): string => {
@@ -409,16 +392,6 @@ export function PokemonModal({
         <div className="modal-layout">
           <div className="modal-left">
             <div className="modal-sprite-section">
-              {type1 !== 'N/A' && (
-                <div
-                  className="modal-sprite-gradient"
-                  aria-hidden="true"
-                  data-types={type2 ? `${type1} ${type2}` : type1}
-                >
-                  <span className={`modal-sprite-tone ${type1}`} />
-                  {type2 && <span className={`modal-sprite-tone ${type2}`} />}
-                </div>
-              )}
               {currentSprite ? (
                 <img src={currentSprite} alt={name} className="modal-image" />
               ) : (
